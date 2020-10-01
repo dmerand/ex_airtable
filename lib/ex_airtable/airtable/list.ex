@@ -3,6 +3,8 @@ defmodule ExAirtable.Airtable.List do
   Struct for an Airtable List of Records
   """
 
+  @derive {Jason.Encoder, except: [:offset]}
+
   alias ExAirtable.Airtable.Record
 
   defstruct records: [], offset: nil
@@ -11,6 +13,7 @@ defmodule ExAirtable.Airtable.List do
     records: [Record.t()],
     offset: String.t()
   }
+
 
   @doc """
   Convert a typical Airtable JSON response into a %List{}

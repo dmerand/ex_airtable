@@ -73,7 +73,10 @@ defmodule ExAirtable.Service do
   end
 
   defp default_headers(%Config.Table{} = table) do
-    %{"Authorization": "Bearer #{table.base.api_key}"}
+    %{
+      "Authorization": "Bearer #{table.base.api_key}",
+      "Content-Type": "application/json"
+    }
   end
 
   defp perform_get(table, opts \\ []) do
@@ -86,7 +89,7 @@ defmodule ExAirtable.Service do
     case request(request_data) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         body
-        |> Poison.decode!
+        |> Jason.decode!
       {:ok, %HTTPoison.Response{status_code: 429}} ->
         Process.sleep(:timer.seconds(30))
         perform_get(opts)
