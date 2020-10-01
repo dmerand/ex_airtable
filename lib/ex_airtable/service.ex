@@ -2,12 +2,12 @@ defmodule ExAirtable.Service do
   @moduledoc """
   This is where the bulk of the work happens to request and modify data in an Airtable table.
 
-  These methods can be called directly, provided you have a valid `%ExAirtable.Table{}` configuration. Alternatively, you can define a module that "inherits" this behavior - see `Table` for more details.
+  These methods can be called directly, provided you have a valid `%ExAirtable.Config.Table{}` configuration. Alternatively, you can define a module that "inherits" this behavior - see `Table` for more details.
 
   ## Examples
     
-      iex> table = %ExAirtable.Table{
-        base: %ExAirtable.Base{
+      iex> table = %ExAirtable.Config.Table{
+        base: %ExAirtable.Config.Base{
           id: "your base ID",
           api_key: "your api key"
         },
@@ -22,10 +22,10 @@ defmodule ExAirtable.Service do
 
   use HTTPoison.Base
 
-  alias ExAirtable.{Airtable, Table}
+  alias ExAirtable.{Airtable, Config}
 
   @doc """
-  Get all records from a `%Table{}`. Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
+  Get all records from a `%Config.Table{}`. Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
 
   Valid options are:
 
@@ -36,21 +36,21 @@ defmodule ExAirtable.Service do
       iex> list(table, params: %{view: "My View Name"})
       %Airtable.List{}
   """
-  def list(%Table{} = table, opts \\ []) do
+  def list(%Config.Table{} = table, opts \\ []) do
     perform_get(table, opts)
     |> Airtable.List.from_map()
     |> append_to_paginated_list(table, opts)
   end
 
   @doc """
-  Get a single record from a `%Table{}`, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
+  Get a single record from a `%Config.Table{}`, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
-  def retrieve(%Table{} = table, id) when is_binary(id) do
+  def retrieve(%Config.Table{} = table, id) when is_binary(id) do
     perform_get(table, url_suffix: "/" <> id)
     |> Airtable.Record.from_map
   end
 
-  defp append_to_paginated_list(%Airtable.List{offset: offset} = list, %Table{} = table, opts) when is_binary(offset) do
+  defp append_to_paginated_list(%Airtable.List{offset: offset} = list, %Config.Table{} = table, opts) when is_binary(offset) do
     params = Keyword.get(opts, :params, %{}) |> Map.put(:offset, offset)
     opts = Keyword.put(opts, :params, params)
     new_list = list(table, opts)
@@ -65,14 +65,14 @@ defmodule ExAirtable.Service do
   end
   defp append_to_paginated_list(list, _table, _opts), do: list
 
-  defp base_url(%Table{} = table, suffix) when is_binary(suffix) do
+  defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
     table.base.endpoint_url <> "/" <> 
       URI.encode(table.base.id) <> "/" <> 
       URI.encode(table.name) <> 
       URI.encode(suffix)
   end
 
-  defp default_headers(%Table{} = table) do
+  defp default_headers(%Config.Table{} = table) do
     %{"Authorization": "Bearer #{table.base.api_key}"}
   end
 

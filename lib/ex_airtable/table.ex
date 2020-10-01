@@ -7,7 +7,7 @@ defmodule ExAirtable.Table do
       defmodule MyTable do
         use ExAirtable.Table
 
-        def base, do: %ExAirtable.Base{
+        def base, do: %ExAirtable.Config.Base{
           id: "your base ID",
           api_key: "your api key"
         }
@@ -21,20 +21,10 @@ defmodule ExAirtable.Table do
       %ExAirtable.Airtable.Record{} 
   """
 
-  alias ExAirtable.{Base, Service}
+  alias ExAirtable.{Config, Service}
 
-  defstruct base: %Base{}, name: nil
-
-  @typedoc """
-  A configuration for an Airtable Table - a reference to a `%Base{}` and a name.
-  """
-  @type t :: %__MODULE__{
-    base: Base.t(),
-    name: String.t()
-  }
-
-  @doc "A valid %ExAirtable.Base{} config for your table"
-  @callback base :: Base.t()
+  @doc "A valid %ExAirtable.Config.Base{} config for your table"
+  @callback base :: Config.Base.t()
 
   @doc "The name of your table within Airtable"
   @callback name() :: String.t()
@@ -67,7 +57,7 @@ defmodule ExAirtable.Table do
       Utility function to return the table struct
       """
       def table() do
-        %ExAirtable.Table{base: base(), name: name()}
+        %Config.Table{base: base(), name: name()}
       end
     end
   end

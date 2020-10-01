@@ -1,11 +1,11 @@
 defmodule ExAirtable.TableTest do
   use ExUnit.Case, async: true
-  alias ExAirtable.{Airtable, Base}
+  alias ExAirtable.{Airtable, Config}
 
   defmodule ExternalTable do
     use ExAirtable.Table
 
-    def base, do: %Base{
+    def base, do: %Config.Base{
       id: System.get_env("BASE_ID"),
       api_key: System.get_env("API_KEY")
     }
@@ -15,7 +15,7 @@ defmodule ExAirtable.TableTest do
   defmodule MockTable do
     use ExAirtable.Table
 
-    def base, do: %Base{id: "Mock ID", api_key: "Who Cares?"}
+    def base, do: %Config.Base{id: "Mock ID", api_key: "Who Cares?"}
     def name, do: System.get_env("TABLE_NAME")
     def retrieve(_id), do: record()
     def list(_opts), do: %Airtable.List{records: [record()]}
@@ -29,7 +29,7 @@ defmodule ExAirtable.TableTest do
   end
 
   test "use" do
-    assert %Base{} = MockTable.base()
+    assert %Config.Base{} = MockTable.base()
     assert MockTable.name() == "Videos"
   end
 
