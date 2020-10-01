@@ -19,13 +19,7 @@ defmodule ExAirtable.TableTest do
     def name, do: System.get_env("TABLE_NAME")
     def retrieve(_id), do: record()
     def list(_opts), do: %Airtable.List{records: [record()]}
-
-    defp record do
-      %Airtable.Record{
-        id: "1",
-        createdTime: "Today" 
-      }
-    end
+    defp record, do: %Airtable.Record{ id: "1", createdTime: "Today" }
   end
 
   test "use" do
@@ -64,5 +58,16 @@ defmodule ExAirtable.TableTest do
     full_list = ExternalTable.list()
     paginated_list = ExternalTable.list(params: %{limit: 10})
     assert Enum.count(full_list.records) == Enum.count(paginated_list.records)
+  end
+
+  @tag :external_mutation
+  test "create" do
+    list = %Airtable.List{records: [
+      %Airtable.Record{fields: %{
+        "Name" => "Test Name",
+        "Description" => "Test Description"
+      }}
+    ]}
+    assert %Airtable.List{} = ExternalTable.create(list)
   end
 end

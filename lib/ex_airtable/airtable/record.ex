@@ -3,7 +3,7 @@ defmodule ExAirtable.Airtable.Record do
   Struct for an Airtable Record
   """
 
-  @derive {Jason.Encoder, except: [:createdTime]}
+  @derive {Jason.Encoder, except: [:id, :createdTime]}
 
   defstruct id: nil,
             fields: %{},

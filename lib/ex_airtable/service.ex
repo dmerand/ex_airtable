@@ -25,6 +25,14 @@ defmodule ExAirtable.Service do
   alias ExAirtable.{Airtable, Config}
 
   @doc """
+  Create a record in Airtable. Pass in a valid `%Airtable.List{}` struct.
+  """
+  def create(%Config.Table{} = table, %Airtable.List{} = list) do
+    perform_request(table, method: :post, body: Jason.encode!(list))
+    |> Airtable.List.from_map()
+  end
+
+  @doc """
   Get all records from a `%Config.Table{}`. Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
 
   Valid options are:
@@ -37,7 +45,7 @@ defmodule ExAirtable.Service do
       %Airtable.List{}
   """
   def list(%Config.Table{} = table, opts \\ []) do
-    perform_get(table, opts)
+    perform_request(table, opts)
     |> Airtable.List.from_map()
     |> append_to_paginated_list(table, opts)
   end
@@ -46,7 +54,7 @@ defmodule ExAirtable.Service do
   Get a single record from a `%Config.Table{}`, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do
-    perform_get(table, url_suffix: "/" <> id)
+    perform_request(table, url_suffix: "/" <> id)
     |> Airtable.Record.from_map
   end
 
@@ -79,11 +87,13 @@ defmodule ExAirtable.Service do
     }
   end
 
-  defp perform_get(table, opts \\ []) do
+  defp perform_request(table, opts) when is_list(opts) do
     request_data = %HTTPoison.Request{
-      url: base_url(table, Keyword.get(opts, :url_suffix, "")),
+      body: Keyword.get(opts, :body, ""),
       headers: default_headers(table),
-      params: Keyword.get(opts, :params)
+      method: Keyword.get(opts, :method, :get),
+      params: Keyword.get(opts, :params),
+      url: base_url(table, Keyword.get(opts, :url_suffix, ""))
     }
 
     case request(request_data) do
@@ -92,9 +102,9 @@ defmodule ExAirtable.Service do
         |> Jason.decode!
       {:ok, %HTTPoison.Response{status_code: 429}} ->
         Process.sleep(:timer.seconds(30))
-        perform_get(opts)
+        perform_request(table, opts)
       {:ok, %HTTPoison.Response{} = response} ->
-        {:error, response.status_code}
+        {:error, response}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end

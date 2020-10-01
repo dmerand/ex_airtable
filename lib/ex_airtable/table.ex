@@ -21,7 +21,7 @@ defmodule ExAirtable.Table do
       %ExAirtable.Airtable.Record{} 
   """
 
-  alias ExAirtable.{Config, Service}
+  alias ExAirtable.{Airtable, Config, Service}
 
   @doc "A valid %ExAirtable.Config.Base{} config for your table"
   @callback base :: Config.Base.t()
@@ -32,6 +32,13 @@ defmodule ExAirtable.Table do
   defmacro __using__(_) do
     quote do
       @behaviour ExAirtable.Table
+
+      @doc """
+      Create a record in your Airtable. See `Service.create/2` for details.
+      """
+      def create(%Airtable.List{} = list) do
+        Service.create table(), list
+      end
 
       @doc """
       Get all records from your Airtable. See `Service.list/3` for details.
