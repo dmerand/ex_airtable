@@ -21,4 +21,8 @@ be found at [https://hexdocs.pm/ex_airtable](https://hexdocs.pm/ex_airtable).
 
 ## Testing
 
-After updating the test environment data in `Makefile`, run `make tests`.
+The test suite is designed to work both on local mocks and on an (optional) external Airtable source.
+
+If you'd like to only run local tests without hitting any external APIs, run `make tests_no_external`.
+
+If you'd like to run external APIs, you'll need to update the environment variables in the `Makefile` to point to your example Airtable.  After updating the test environment data in `Makefile`, you can run `make tests`.

@@ -1,9 +1,9 @@
 API_KEY=REDACTED
 BASE_ID=REDACTED
 TABLE_NAME=REDACTED
-ENV=env API_KEY=$(API_KEY) \
-				BASE_ID=$(BASE_ID) \
-				TABLE_NAME=$(TABLE_NAME)
+ENV=API_KEY=$(API_KEY) \
+	BASE_ID=$(BASE_ID) \
+	TABLE_NAME=$(TABLE_NAME)
 
 help:
 	@echo "options: console, test, test_no_external"

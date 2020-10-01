@@ -50,12 +50,18 @@ defmodule ExAirtable.Table do
         Service.list table(), opts
       end
 
+      # Make list overrideable for testing mocks
+      defoverridable list: 1
+
       @doc """
       Get a single record from your Airtable, matching by ID. See `Service.retrieve/2` for details.
       """
       def retrieve(id) when is_binary(id) do
         Service.retrieve table(), id
       end
+
+      # Make list overrideable for testing mocks
+      defoverridable retrieve: 1
 
       @doc """
       Utility function to return the table struct

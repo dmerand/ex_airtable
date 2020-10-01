@@ -87,11 +87,11 @@ defmodule ExAirtable.Service do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         body
         |> Poison.decode!
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:error, :not_found}
       {:ok, %HTTPoison.Response{status_code: 429}} ->
         Process.sleep(:timer.seconds(30))
         perform_get(opts)
+      {:ok, %HTTPoison.Response{} = response} ->
+        {:error, response.status_code}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end

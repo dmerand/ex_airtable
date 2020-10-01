@@ -4,7 +4,7 @@ defmodule ExAirtable.Airtable.Record do
   """
 
   defstruct id: nil,
-            fields: [],
+            fields: %{},
             createdTime: nil
 
   @type t :: %__MODULE__{
