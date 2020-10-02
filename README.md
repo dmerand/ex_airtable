@@ -52,10 +52,10 @@ To run a local caching server, you can include a reference to the `ExAirtable` c
 The codebase includes an example `Table` (`ExAirtable.Example.EnvTable`) that you can use to play around and get an idea of how the system works. This module uses environment variables as configuration. The included `Makefile` provides some quick command-line tools to run tests and a console with those environment variables pre-loaded. Simply edit the relevant environment variables in `Makefile` to point to a valid base/table name, and you'll be able to interact directly like this:
 
     # first, run `make console`, then...
+    
+    # to retrieve data directly from Airtable's API...
     iex> EnvTable.list
     %ExAirtable.Airtable.List{records: [%Record{}, %Record{}, ...]}
-
-    # to retrieve data directly from Airtable's API...
     iex> EnvTable.retrieve("rec12345")
     %ExAirtable.Airtable.Record{}
 
