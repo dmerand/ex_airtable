@@ -6,6 +6,6 @@ defmodule ExAirtable.Airtable.ListTest do
     list = %List{records: [
       %Record{id: "recordID", fields: %{name: "value"}}
     ]}
-    assert "{\"records\":[{\"fields\":{\"name\":\"value\"}}]}" = Jason.encode!(list)
+    assert "{\"records\":[{\"fields\":{\"name\":\"value\"},\"id\":\"recordID\"}]}" = Jason.encode!(list)
   end
 end

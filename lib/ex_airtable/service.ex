@@ -26,10 +26,35 @@ defmodule ExAirtable.Service do
 
   @doc """
   Create a record in Airtable. Pass in a valid `%Airtable.List{}` struct.
+
+  ## Example
+
+      iex> create(table, %List{})
+      %List{}
+
+      iex> create(table, list_with_errors)
+      {:error, reason}
   """
   def create(%Config.Table{} = table, %Airtable.List{} = list) do
-    perform_request(table, method: :post, body: Jason.encode!(list))
+    body =
+      list
+      |> remove_objectionable_fields()
+      |> Jason.encode!()
+
+    perform_request(table, method: :post, body: body)
     |> Airtable.List.from_map()
+  end
+
+  @doc """
+  Delete a single record (by ID) from an Airtable
+
+  ## Example
+      
+      iex> delete(table, "recJmmAR0IzpaekBn")
+      %{"deleted" => true, "id" => "recJmmAR0IzpaekBn"}
+  """
+  def delete(%Config.Table{} = table, id) when is_binary(id) do
+    perform_request(table, method: :delete, url_suffix: "/#{id}")
   end
 
   @doc """
@@ -56,6 +81,29 @@ defmodule ExAirtable.Service do
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do
     perform_request(table, url_suffix: "/" <> id)
     |> Airtable.Record.from_map
+  end
+
+  @doc """
+  Update a `List{}` of `Record{}`s in Airtable.
+
+  Valid options include:
+
+  - `objectionable_fields` - A list of field names to remove from the `fields` entry of any `Record` in your `List`. This is typically used if you're trying to update in a table that doesn't allow updating certain (calculated) fields.
+  - `overwrite` - Will overwrite all values in the destination record with values being sent. Default is false, which will only update fields that have values (ie aren't null).
+  """
+  def update(%Config.Table{} = table, %Airtable.List{} = list, opts \\ []) do
+    method = case Keyword.fetch(opts, :overwrite) do
+      true -> :put
+      _ -> :patch
+    end
+
+    body =
+      list
+      |> remove_objectionable_fields(Keyword.get(opts, :objectionable_fields, []))
+      |> Jason.encode!()
+
+    perform_request(table, method: method, body: body)
+    |> Airtable.List.from_map()
   end
 
   defp append_to_paginated_list(%Airtable.List{offset: offset} = list, %Config.Table{} = table, opts) when is_binary(offset) do
@@ -108,5 +156,18 @@ defmodule ExAirtable.Service do
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end
+  end
+
+  defp remove_objectionable_fields(%Airtable.List{} = list, fields \\ [:id]) do
+    # Airtable really doesn't like createdTime being in any pushes.
+    fields = [:createdTime] ++ fields
+
+    %{list | records: Enum.map(list.records, fn record ->
+      Enum.reduce(fields, Map.from_struct(record), fn field, acc ->
+        %{Map.delete(acc, field) | fields:
+          Map.delete(acc.fields, field)
+        }
+      end)
+    end)}
   end
 end

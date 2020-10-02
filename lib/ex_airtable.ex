@@ -75,6 +75,13 @@ defmodule ExAirtable do
   def create(table, %Airtable.List{} = list) do
     apply(table, :create, [list])
   end
+
+  @doc """
+  Delete a single record (by ID) from an Airtable
+  """
+  def delete(table, id) when is_binary(id) do
+    apply(table, :delete, [id])
+  end
 	
   @doc """
   Get all records from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.Cache` (if one is started in the supervision tree). Prefer the cache if one exists.
@@ -97,4 +104,15 @@ defmodule ExAirtable do
       _ -> apply(table, :retrieve, [key])
     end
 	end
+
+  @doc """
+  Update a record in your Airtable. 
+
+  One particular thing to note is that Airtable won't allow updates for records that pass calculated fields. The `objectionable_fields: ["list", "of", "fieldNames"]` option will allow you to point those out so that your update goes through.
+
+  See `Service.create/2` for more details about options that can be passed.
+  """
+  def update(table, %Airtable.List{} = list, opts \\ []) do
+    apply(table, :update, [list, opts])
+  end
 end

@@ -41,6 +41,13 @@ defmodule ExAirtable.Table do
       end
 
       @doc """
+      Delete a single record (by ID) from an Airtable
+      """
+      def delete(id) when is_binary(id) do
+        Service.delete table(), id
+      end
+
+      @doc """
       Get all records from your Airtable. See `Service.list/3` for details.
       """
       def list(opts \\ []) do
@@ -65,6 +72,13 @@ defmodule ExAirtable.Table do
       """
       def table() do
         %Config.Table{base: base(), name: name()}
+      end
+
+      @doc """
+      Update a record in your Airtable. See `Service.create/2` for details.
+      """
+      def update(%Airtable.List{} = list, opts \\ []) do
+        Service.update table(), list, opts
       end
     end
   end
