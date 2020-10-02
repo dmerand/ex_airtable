@@ -1,6 +1,6 @@
 defmodule ExAirtable.Table do
   @moduledoc """
-  The `Table` interface allows you to define your own modules that use Airtables. It is a thin wrapper around `Service`, but often more convenient to use.
+  The `Table` behaviour allows you to define your own modules that use Airtables. It is a thin wrapper around `Service`, but often more convenient to use.
 
   ## Examples
   
