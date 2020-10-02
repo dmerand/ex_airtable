@@ -17,10 +17,10 @@ defmodule ExAirtable.CacheTest do
     assert Atom.to_string(table_name) =~ @table_module.base.id
   end
 
-  test "set + get by ID" do
+  test "set + retrieve by ID" do
     Cache.set(@table_module, "cool", "beans")
     Process.sleep(10) # Give it a moment, since it's a cast
-    assert {:ok, "beans"} = Cache.get(@table_module, "cool")
+    assert {:ok, "beans"} = Cache.retrieve(@table_module, "cool")
   end
 
   test "multiple cache servers don't overlap" do
@@ -29,17 +29,17 @@ defmodule ExAirtable.CacheTest do
     Cache.set(@table_module, "new", "item")
     Cache.set(EnvTable, "new", "other_item")
     Process.sleep(10) # Give it a moment, since it's a cast
-    assert {:ok, "item"} = Cache.get(@table_module, "new")
-    assert {:ok, "other_item"} = Cache.get(EnvTable, "new")
+    assert {:ok, "item"} = Cache.retrieve(@table_module, "new")
+    assert {:ok, "other_item"} = Cache.retrieve(EnvTable, "new")
   end
 
-  test "set_all + get_all" do
+  test "set_all + list" do
     list = %List{records: [
       %Record{id: 1, fields: %{cool: "beans"}},
       %Record{id: 2, fields: %{neato: "mosquito"}},
     ]}
     Cache.set_all(@table_module, list)
     Process.sleep(10) # Give it a moment, since it's a cast
-    assert {:ok, %List{} = list} = Cache.get_all(@table_module)
+    assert {:ok, %List{} = list} = Cache.list(@table_module)
   end
 end

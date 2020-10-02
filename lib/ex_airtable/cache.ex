@@ -4,10 +4,10 @@ defmodule ExAirtable.Cache do
 
   ## Examples
       
-      iex> Cache.get(MyAirtableTable, "rec1234")
+      iex> Cache.retrieve(MyAirtableTable, "rec1234")
       %Airtable.Record{}
 
-      iex> Cache.get_all(MyAirtableTable)
+      iex> Cache.list(MyAirtableTable)
       %Airtable.List{records: [%Airtable.Record{}, ...]}
   """
 
@@ -28,27 +28,11 @@ defmodule ExAirtable.Cache do
   ############
   # PUBLIC API
   ############
-
-  @doc """
-  Given an `ExAirtable.Table` module and a string key, get the %Record{} in that cache with the matching key.
-  """
-  def get(table_module, key) when is_binary(key) do
-    table_module
-    |> table_for()
-    |> :ets.lookup(key)
-    |> case do
-      [{^key, value} | _] ->
-        {:ok, value}
-
-      _ ->
-        {:error, :not_found}
-    end
-  end
-
+  
   @doc """
   Given an `ExAirtable.Table` module, get all `%Airtable.Record{}`s in that cache's table as an `%Airtable.List{}`.
   """
-  def get_all(table_module) do
+  def list(table_module) do
     table_module
     |> table_for()
     |> :ets.tab2list()
@@ -57,6 +41,23 @@ defmodule ExAirtable.Cache do
         {:ok, %Airtable.List{
           records: Enum.map(values, &elem(&1, 1))
         }}
+
+      _ ->
+        {:error, :not_found}
+    end
+  end
+
+
+  @doc """
+  Given an `ExAirtable.Table` module and a string key, get the %Record{} in that cache with the matching key.
+  """
+  def retrieve(table_module, key) when is_binary(key) do
+    table_module
+    |> table_for()
+    |> :ets.lookup(key)
+    |> case do
+      [{^key, value} | _] ->
+        {:ok, value}
 
       _ ->
         {:error, :not_found}
