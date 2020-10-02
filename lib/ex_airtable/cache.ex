@@ -1,18 +1,20 @@
 defmodule ExAirtable.Cache do
-  alias ExAirtable.Cache
+  alias ExAirtable.{Airtable, Cache}
+
+  defstruct module: nil, sync_ref: nil, sync_rate: nil
+
+  @typedoc """
+  A struct that contains the state for a `Cache`
+  """
+  @type t :: %__MODULE__{
+    module: module(),
+    sync_ref: pid(),
+    sync_rate: integer()
+  }
 
   defmacro __using__(_) do
     quote do
       use GenServer
-
-      @impl GenServer
-      def init(module) do
-        module
-        |> Cache.table_for() 
-        |> :ets.new([:ordered_set, :protected, :named_table])
-
-        {:ok, %{module: module}}
-      end
 
       def child_spec(opts) do
         %{
@@ -24,8 +26,34 @@ defmodule ExAirtable.Cache do
         }
       end
 
-      def start_link(module) do
-        GenServer.start_link(__MODULE__, module, name: __MODULE__)
+      @impl GenServer
+      @doc """
+      Initiliaze the caching server. This is not meant to be called manually, but will be handle when `start_link/2` is called.
+      """
+      def init({module, opts}) do
+        module
+        |> Cache.table_for() 
+        |> :ets.new([:ordered_set, :protected, :named_table])
+
+        {:ok, pid} = Cache.Synchronizer.start_link(
+          cache: __MODULE__, 
+          sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(30))
+        )
+        ref = Process.monitor(pid)
+
+        state = %unquote(__MODULE__){module: module, sync_ref: ref}
+        {:ok, state}
+      end
+
+      @doc """
+      Start a caching server. 
+
+      Valid options (in the `opts` field) include:
+
+      - `sync_rate` - How often (in ms) to refresh data from Airtable.
+      """
+      def start_link(module, opts \\ []) do
+        GenServer.start_link(__MODULE__, {module, opts}, name: __MODULE__)
       end
 
       @impl GenServer
@@ -34,9 +62,8 @@ defmodule ExAirtable.Cache do
       end
 
       @impl GenServer
-      def handle_cast({:set_all, items}, %{module: module} = state)
-          when is_list(items) do
-        Enum.each(items, &:ets.insert(Cache.table_for(module), {&1.id, &1}))
+      def handle_cast({:set_all, %Airtable.List{records: records}}, %{module: module} = state) do
+        Enum.each(records, &:ets.insert(Cache.table_for(module), {&1.id, &1}))
 
         {:noreply, state}
       end
@@ -48,9 +75,27 @@ defmodule ExAirtable.Cache do
 
         {:noreply, state}
       end
+
+			@impl GenServer
+			def handle_info(
+						{:DOWN, ref, :process, _object, _reason},
+						%{synchronizer_ref: ref} = state
+					) do
+        {:ok, pid} = Cache.Synchronizer.start_link(cache: __MODULE__)
+				ref = Process.monitor(pid)
+
+				{:noreply, %{state | sync_ref: ref}}
+			end
+
+			def handle_info({:EXIT, _, _}, state) do
+				{:noreply, state}
+			end
     end
   end
 
+  @doc """
+  Given an `ExAirtable.Cache` module, get all `%Airtable.Record{}`s in that cache's table as an `%Airtable.List{}`.
+  """
   def get_all(cache) do
     cache
     |> module_for()
@@ -58,14 +103,19 @@ defmodule ExAirtable.Cache do
     |> :ets.tab2list()
     |> case do
       values when values != [] ->
-        {:ok, Enum.map(values, &elem(&1, 1))}
+        {:ok, %Airtable.List{
+          records: Enum.map(values, &elem(&1, 1))
+        }}
 
       _ ->
         {:error, :not_found}
     end
   end
 
-  def get(cache, key) do
+  @doc """
+  Given an `ExAirtable.Cache` module and a key, get the %Record{} in that cache with the matching key.
+  """
+  def get(cache, key) when is_binary(key) do
     cache
     |> module_for()
     |> table_for()
@@ -79,15 +129,31 @@ defmodule ExAirtable.Cache do
     end
   end
 
+  @doc """
+  Returns the name of the associated `ExAirtable.Table` module for the given `ExAirtable.Cache` module.
+  """
   def module_for(cache) do
     GenServer.call(cache, :get_module)
   end
 
+  @doc """
+  Returns a valid ETS table name for a give `ExAirtable.Table` module.
+  """
   def table_for(module) do
-    String.to_atom(module.name)
+    String.to_atom(module.name())
   end
 
-  def set(cache, id, item), do: GenServer.cast(cache, {:set, id, item})
+  @doc """
+  Given an `ExAirtable.Cache` module, an ID, and a corresponding item to match that ID, store it in the cache.
+  """
+  def set(cache, id, item) when is_binary(id) do
+    GenServer.cast(cache, {:set, id, item})
+  end
 
-  def set_all(cache, items), do: GenServer.cast(cache, {:set_all, items})
+  @doc """
+  Replace an entire cache with a new set of `%Airtable.Record{}`s.
+  """
+  def set_all(cache, %Airtable.List{} = list) do
+    GenServer.cast(cache, {:set_all, list})
+  end
 end

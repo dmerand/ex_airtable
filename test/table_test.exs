@@ -1,6 +1,7 @@
 defmodule ExAirtable.TableTest do
   use ExUnit.Case, async: true
-  alias ExAirtable.{Airtable, Config, MockTable, ExternalTable}
+  alias ExAirtable.{Airtable, Config, MockTable}
+  alias ExAirtable.Example.EnvTable
 
   test "use" do
     assert %Config.Base{} = MockTable.base()
@@ -23,20 +24,20 @@ defmodule ExAirtable.TableTest do
 
   @tag :external_api
   test "get by erroneous ID" do
-    assert {:error, _reason} = ExternalTable.retrieve("wat")
+    assert {:error, _reason} = EnvTable.retrieve("wat")
   end
 
   @tag :external_api
   test "list with a view" do
-    list = ExternalTable.list(params: %{view: "Main View"})
+    list = EnvTable.list(params: %{view: "Main View"})
     assert %Airtable.List{} = list
     assert [%Airtable.Record{} | rest] = list.records
   end
 
   @tag :external_api
   test "list with pagination" do
-    full_list = ExternalTable.list()
-    paginated_list = ExternalTable.list(params: %{limit: 10})
+    full_list = EnvTable.list()
+    paginated_list = EnvTable.list(params: %{limit: 10})
     assert Enum.count(full_list.records) == Enum.count(paginated_list.records)
   end
 
@@ -48,6 +49,6 @@ defmodule ExAirtable.TableTest do
         "Description" => "Test Description"
       }}
     ]}
-    assert %Airtable.List{} = ExternalTable.create(list)
+    assert %Airtable.List{} = EnvTable.create(list)
   end
 end
