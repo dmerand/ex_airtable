@@ -34,8 +34,8 @@ To run a local caching server, you can include a reference to the `ExAirtable` c
           # ...
 
           # cache processes
-          {ExAirtable.Cache, table_module: MyAirtable},
-          {ExAirtable.Cache, table_module: MyOtherAirtable},
+          {ExAirtable.Cache, table_module: MyApp.MyAirtable},
+          {ExAirtable.Cache, table_module: MyApp.MyOtherAirtable},
 
           # ...
         ]

@@ -34,8 +34,8 @@ defmodule ExAirtable do
             # ...
 
             # cache processes
-            {ExAirtable.Cache, table_module: MyAirtable},
-            {ExAirtable.Cache, table_module: MyOtherAirtable},
+            {ExAirtable.Cache, table_module: MyApp.MyAirtable},
+            {ExAirtable.Cache, table_module: MyApp.MyOtherAirtable},
 
             # ...
           ]
