@@ -1,23 +1,23 @@
-defmodule ExAirtable.Cache do
+defmodule ExAirtable.TableCache do
   @moduledoc """
   A caching server for an `ExAirtable.Table`. Given a `Table` when initialized, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
 
   ## Examples
       
-      iex> Cache.retrieve(MyAirtableTable, "rec1234")
+      iex> TableCache.retrieve(MyAirtableTable, "rec1234")
       %Airtable.Record{}
 
-      iex> Cache.list(MyAirtableTable)
+      iex> TableCache.list(MyAirtableTable)
       %Airtable.List{records: [%Airtable.Record{}, ...]}
   """
 
-  alias ExAirtable.{Airtable, Cache}
+  alias ExAirtable.{Airtable, TableCache, TableSynchronizer}
   use GenServer
 
   defstruct table_module: nil, sync_ref: nil, sync_rate: nil
 
   @typedoc """
-  A struct that contains the state for a `Cache`.
+  A struct that contains the state for a `TableCache`.
   """
   @type t :: %__MODULE__{
     table_module: module(),
@@ -117,7 +117,7 @@ defmodule ExAirtable.Cache do
 
   @impl GenServer
   @doc """
-  Initialize the caching server. This is not meant to be called manually, but will be handle when `start_link/2` is called.
+  Initialize the caching server. This is not meant to be called manually, but will be handle when `start_link/1` is called.
 
   See `start_link/1` for options.
   """
@@ -140,14 +140,14 @@ defmodule ExAirtable.Cache do
   @impl GenServer
   def handle_cast({:set, id, item}, %{table_module: table_module} = state) do
     table_module
-    |> Cache.table_for()
+    |> TableCache.table_for()
     |> :ets.insert({id, item})
 
     {:noreply, state}
   end
 
   def handle_cast({:set_all, %Airtable.List{records: records}}, %{table_module: table_module} = state) do
-    Enum.each(records, &:ets.insert(Cache.table_for(table_module), {&1.id, &1}))
+    Enum.each(records, &:ets.insert(TableCache.table_for(table_module), {&1.id, &1}))
 
     {:noreply, state}
   end
@@ -162,7 +162,7 @@ defmodule ExAirtable.Cache do
   end
 
   defp initialize_synchronizer(state) do
-    {:ok, pid} = Cache.Synchronizer.start_link(
+    {:ok, pid} = TableSynchronizer.start_link(
       table_module: state.table_module, 
       sync_rate: state.sync_rate
     )

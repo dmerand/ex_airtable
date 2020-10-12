@@ -34,8 +34,8 @@ defmodule ExAirtable do
             # ...
 
             # cache processes
-            {ExAirtable.Cache, table_module: MyApp.MyAirtable},
-            {ExAirtable.Cache, table_module: MyApp.MyOtherAirtable},
+            {ExAirtable.TableCache, table_module: MyApp.MyAirtable},
+            {ExAirtable.TableCache, table_module: MyApp.MyOtherAirtable},
 
             # ...
           ]
@@ -61,14 +61,14 @@ defmodule ExAirtable do
       %ExAirtable.Airtable.Record{}
 
       # to start a caching server for your table...
-      iex> ExAirtable.Cache.start_link(table_module: EnvTable, sync_rate: :timer.seconds(5))
+      iex> ExAirtable.TableCache.start_link(table_module: EnvTable, sync_rate: :timer.seconds(5))
 
       # to get all records from the cache (without hitting the Airtable API)
-      iex> Cache.get_all(EnvTable)
+      iex> TableCache.get_all(EnvTable)
       %ExAirtable.Airtable.List{}
   """
 
-  alias ExAirtable.{Airtable, Cache}
+  alias ExAirtable.{Airtable, TableCache}
 
   @doc """
   Create a record in your Airtable. See `Service.create/2` for details.
@@ -85,22 +85,22 @@ defmodule ExAirtable do
   end
 	
   @doc """
-  Get all records from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.Cache` (if one is started in the supervision tree). Prefer the cache if one exists.
+  Get all records from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.TableCache` (if one is started in the supervision tree). Prefer the cache if one exists.
   """
 	def list(table) do
     try do
-      Cache.list(table)
+      TableCache.list(table)
     rescue
       _ -> apply(table, :list, [])
     end
 	end
 
   @doc """
-  Retrieve a single record from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.Cache` (if one is started in the supervision tree). Prefer the cache if one exists.
+  Retrieve a single record from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.TableCache` (if one is started in the supervision tree). Prefer the cache if one exists.
   """
 	def retrieve(table, key) when is_binary(key) do
     try do
-      Cache.retrieve(table, key)
+      TableCache.retrieve(table, key)
     rescue
       _ -> apply(table, :retrieve, [key])
     end

@@ -54,7 +54,7 @@ defmodule ExAirtable.Table do
         Service.list table(), opts
       end
 
-      # Make list overrideable for testing mocks
+      # Make overrideable for testing mocks
       defoverridable list: 1
 
       @doc """
@@ -64,7 +64,7 @@ defmodule ExAirtable.Table do
         Service.retrieve table(), id
       end
 
-      # Make list overrideable for testing mocks
+      # Make overrideable for testing mocks
       defoverridable retrieve: 1
 
       @doc """

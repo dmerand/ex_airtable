@@ -1,8 +1,8 @@
 defmodule ExAirtable.Service do
   @moduledoc """
-  This is where the bulk of the work happens to request and modify data in an Airtable table.
+  This module is where we directly hit the Airtable API. Most methods take an `Airtable.Config.Table{}`, along with parameters to be forwarded to the REST API.
 
-  These methods can be called directly, provided you have a valid `%ExAirtable.Config.Table{}` configuration. Alternatively, you can define a module that "inherits" this behavior - see `Table` for more details.
+  These methods can be called directly, provided you have a valid `%ExAirtable.Config.Table{}` configuration. Alternatively, you can define a module that "inherits" this behavior - see `ExAirtable.Table` for more details.
 
   ## Examples
     

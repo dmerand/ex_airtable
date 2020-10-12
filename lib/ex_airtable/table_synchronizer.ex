@@ -1,12 +1,12 @@
-defmodule ExAirtable.Cache.Synchronizer do
+defmodule ExAirtable.TableSynchronizer do
   @moduledoc """
-  Run scheduled synchronization of an `ExAirtable.Cache` against the relevant Airtable base. This will be automatically spawned and linked to an `ExAirtable.Cache` when `start_link/2` is run for that cache.
+  Run scheduled synchronization of an `ExAirtable.TableCache` against the relevant Airtable base. This will be automatically spawned and linked to an `ExAirtable.TableCache` when `start_link/2` is run for that cache.
   """
 
   defstruct sync_rate: nil, table_module: nil
 
   @typedoc """
-  A struct that contains the state for a `Cache.Synchronizer`
+  A struct that contains the state for a `TableSynchronizer`
   """
   @type t :: %__MODULE__{
     table_module: module(),
@@ -36,7 +36,7 @@ defmodule ExAirtable.Cache.Synchronizer do
   @impl GenServer
   def handle_info(:sync, %{table_module: table_module} = state) do
     Logger.debug "Synching #{inspect table_module}..."
-    Cache.set_all(table_module, fetch(state))
+    TableCache.set_all(table_module, fetch(state))
     schedule(state)
 
     {:noreply, state}

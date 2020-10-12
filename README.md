@@ -34,8 +34,8 @@ To run a local caching server, you can include a reference to the `ExAirtable` c
           # ...
 
           # cache processes
-          {ExAirtable.Cache, table_module: MyApp.MyAirtable},
-          {ExAirtable.Cache, table_module: MyApp.MyOtherAirtable},
+          {ExAirtable.TableCache, table_module: MyApp.MyAirtable},
+          {ExAirtable.TableCache, table_module: MyApp.MyOtherAirtable},
 
           # ...
         ]
@@ -60,10 +60,10 @@ The codebase includes an example `Table` (`ExAirtable.Example.EnvTable`) that yo
     %ExAirtable.Airtable.Record{}
 
     # to start a caching server for your table...
-    iex> ExAirtable.Cache.start_link(table_module: EnvTable, sync_rate: :timer.seconds(5))
+    iex> ExAirtable.TableCache.start_link(table_module: EnvTable, sync_rate: :timer.seconds(5))
 
     # to get all records from the cache (without hitting the Airtable API)
-    iex> Cache.get_all(EnvTable)
+    iex> TableCache.get_all(EnvTable)
     %ExAirtable.Airtable.List{}
       
 ## Installation

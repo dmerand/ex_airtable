@@ -1,6 +1,6 @@
 defmodule ExAirtable.Airtable.List do
   @moduledoc """
-  Struct for an Airtable List of Records
+  Struct for an Airtable List of Records. This should directly match results being sent/returned from the Airtable REST API.
   """
 
   @derive {Jason.Encoder, except: [:offset]}

@@ -1,6 +1,6 @@
 defmodule ExAirtable.Airtable.Record do
   @moduledoc """
-  Struct for an Airtable Record
+  Struct for an Airtable Record. This should directly match the results returned from any Airtable REST API endpoint that returns records.
   """
 
   @derive {Jason.Encoder, except: [:createdTime]}
