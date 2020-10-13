@@ -1,5 +1,5 @@
 defmodule ExAirtable.RateLimiterTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   alias ExAirtable.{BaseQueue, RateLimiter}
   alias ExAirtable.RateLimiter.{Job, Request}
@@ -32,7 +32,7 @@ defmodule ExAirtable.RateLimiterTest do
   end
 
   @tag :external_api # because it's slow, and *technically* external :/
-  test "only pulls 5 requests by default", %{base_queue: base_queue} do
+  test "only pulls 5 requests per wave", %{base_queue: base_queue} do
     Enum.each(1..6, fn i ->
       request = %Request{
         job: %Job{module: String, function: :to_atom, arguments: ["request_#{i}"]},
