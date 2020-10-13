@@ -1,9 +1,11 @@
 defmodule ExAirtable.RateLimiter.Request do
   @moduledoc """
-  The RateLimiter takes a `%Request{}`, runs its `:job` and sends the results to the `:callback` function as arguments. Any arguments defined in the `:callback` `%MFA{}` will be ignored.
+  The RateLimiter takes a `%Request{}`, runs its `:job` and sends the results to the `:callback` function as arguments. 
+  
+  Any arguments defined in the `:callback` `%Job{}` will be prepended to the function arguments, with the results of `:job` being the final argument passed.
   """
 
-  alias ExAirtable.RateLimiter.MFA
+  alias ExAirtable.RateLimiter.Job
 
   defstruct job: nil, 
             callback: nil
@@ -12,7 +14,22 @@ defmodule ExAirtable.RateLimiter.Request do
   A request to an `ExAirtable.RateLimiter`.
   """
   @type t :: %__MODULE__{
-    job: MFA.t(),
-    callback: MFA.t(),
+    job: Job.t(),
+    callback: Job.t(),
   }
+
+  @doc """
+  Run a given `%Request{}`, piping the result to the given callback function if any.
+
+  If arguments are given in the request.callback, then the result of running the request.job will be the final argument after the arguments specified in the callback.
+  """
+  def run(%__MODULE__{} = request) do
+    result = Job.run(request.job)
+    if request.callback do
+      arguments = request.callback.arguments ++ [result]
+      apply(request.callback.module, request.callback.function, arguments)
+    else
+      result
+    end
+  end
 end
