@@ -27,7 +27,7 @@ defmodule ExAirtable.BaseQueue do
   @doc """
   Retrieve the BaseQueue (GenServer) ID for a given table.
   """
-  def base_queue_id(table) do
+  def id(table) do
     "BaseQueue-" <> table.base().id
     |> String.to_atom()
   end
@@ -38,26 +38,12 @@ defmodule ExAirtable.BaseQueue do
   Note that the request buffer is a MapSet - meaning that (exact) duplicate requests will be ignored.
   """
   def request(table, %Request{} = request) do
-    GenServer.cast(base_queue_id(table), {:add_request, request})
+    GenServer.cast(id(table), {:add_request, request})
   end
 
   #
-  # GENSERVER API
+  # GENSERVER / GENSTAGE API
   # 
-
-  @doc """
-  Initial state is a `%BaseQueue{}` struct - see type definitions.
-  """
-  def init(tables) when is_list(tables) do
-    {:producer, %__MODULE__{tables: tables}}
-  end
-
-  @doc "See init/1 for details"
-  def start_link(tables) do
-    first_table = Enum.at(tables, 0)
-    # We're assuming that all passed tables have the same base here!
-    GenStage.start_link(__MODULE__, tables, name: base_queue_id(first_table))
-  end
 
   def handle_cast({:add_request, %Request{} = request}, state) do
     {:noreply, [], %{state | requests: MapSet.put(state.requests, request)}}
@@ -70,5 +56,16 @@ defmodule ExAirtable.BaseQueue do
       |> Enum.split(demand)
 
     {:noreply, events, %{state | requests: MapSet.new(remainder)}}
+  end
+
+  def init(tables) when is_list(tables) do
+    {:producer, %__MODULE__{tables: tables}}
+  end
+
+  def start_link(tables) do
+    # We're assuming that all passed tables have the same base!
+    first_table = Enum.at(tables, 0)
+
+    GenStage.start_link(__MODULE__, tables, name: id(first_table))
   end
 end

@@ -14,7 +14,7 @@ defmodule ExAirtable.BaseQueueTest do
 
   test "ID generation" do
     id = :"BaseQueue-Mock ID" 
-    assert ^id = BaseQueue.base_queue_id(@table_module)
+    assert ^id = BaseQueue.id(@table_module)
   end
 
   test "Initial table state", %{gen_stage: gen_stage} do
