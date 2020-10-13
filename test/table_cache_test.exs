@@ -1,4 +1,4 @@
-defmodule ExAirtable.CacheTest do
+defmodule ExAirtable.TableCacheTest do
   use ExUnit.Case, async: true
   alias ExAirtable.Airtable.{List, Record}
   alias ExAirtable.TableCache

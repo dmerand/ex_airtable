@@ -1,9 +1,9 @@
 ExUnit.start()
 
-alias ExAirtable.{Airtable, Config}
-
 defmodule ExAirtable.MockTable do
   use ExAirtable.Table
+
+  alias ExAirtable.{Airtable, Config}
 
   def base, do: %Config.Base{id: "Mock ID", api_key: "Who Cares?"}
   def name, do: System.get_env("TABLE_NAME")

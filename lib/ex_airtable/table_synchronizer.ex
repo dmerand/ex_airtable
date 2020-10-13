@@ -1,6 +1,8 @@
 defmodule ExAirtable.TableSynchronizer do
   @moduledoc """
-  Run scheduled synchronization of an `ExAirtable.TableCache` against the relevant Airtable base. This will be automatically spawned and linked to an `ExAirtable.TableCache` when `start_link/2` is run for that cache.
+  Run scheduled synchronization of an `ExAirtable.TableCache` against the
+  relevant Airtable base. This will be automatically spawned and linked to an
+  `ExAirtable.TableCache` when `start_link/2` is run for that cache.  
   """
 
   defstruct sync_rate: nil, table_module: nil
@@ -15,7 +17,7 @@ defmodule ExAirtable.TableSynchronizer do
 
   use GenServer
   require Logger
-  alias ExAirtable.Cache
+  alias ExAirtable.TableCache
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts)
