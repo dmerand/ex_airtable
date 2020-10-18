@@ -72,14 +72,20 @@ defmodule ExAirtable do
   alias ExAirtable.RateLimiter.Request
 
   @doc """
-  Create a record in your Airtable. See `Service.create/2` for details.
+  Create a record in your Airtable from an %Airtable.List{} request. If your list includes more than 10 records, the request will be split so as not to be rejected byt the Airtable API.
+  
+  See `Service.create/2` for more details.
   """
   def create(table, %Airtable.List{} = list) do
-    job = Request.create(
-      {table, :create, [list]}, 
-      {TableCache, :set_all, [table]}
-    )
-    BaseQueue.request(table, job)
+    Enum.chunk_every(list.records, 10)
+    |> Enum.each(fn records ->
+      smaller_list = %{list | records: records}
+      job = Request.create(
+        {table, :create, [smaller_list]}, 
+        {TableCache, :set_all, [table]}
+      )
+      BaseQueue.request(table, job)
+    end)
   end
 
   @doc """

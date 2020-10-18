@@ -122,7 +122,8 @@ defmodule ExAirtable.TableCache do
   end
 
   def handle_cast({:set_all, %Airtable.List{records: records}}, %{table_module: table_module} = state) do
-    Enum.each(records, &:ets.insert(table_for(table_module), {&1.id, &1}))
+    table = table_for(table_module)
+    Enum.each(records, &:ets.insert(table, {&1.id, &1}))
 
     {:noreply, state}
   end
