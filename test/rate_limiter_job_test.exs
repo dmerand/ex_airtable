@@ -20,6 +20,6 @@ defmodule ExAirtable.RateLimiter.JobTest do
       callback: %Job{module: Kernel, function: :send, arguments: [self()]}
     }
     Request.run(request)
-    assert_received :has_callback
+    assert_receive :has_callback
   end
 end

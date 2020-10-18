@@ -1,13 +1,13 @@
 defmodule ExAirtable.RateLimiter do
   use GenStage
 
+  alias ExAirtable.BaseQueue
   alias ExAirtable.RateLimiter.{Producer, Request}
 
   def handle_subscribe(:producer, _opts, from, producers) do
     producers = Map.put(producers, from, %Producer{})
     producers = ask_and_schedule(producers, from)
 
-    # Returns :manual, as we want control over the demand
     {:manual, producers}
   end
 
@@ -26,14 +26,17 @@ defmodule ExAirtable.RateLimiter do
   end
 
   @doc """
-  State is a map of %Producer{} structs where the key is the module name of the producer.
+  Pass a list of valid module names where the given modules have implemented the `ExAirtable.Table` behaviour.
+
+  Internal state is a map of `%Producer{}` structs where the key is the module name of the producer.
   """
-  def init(_opts) do
-    {:consumer, %{}}
+  def init(table_modules) do
+    subscriptions = Enum.map(table_modules, &BaseQueue.id/1)
+    {:consumer, %{}, subscribe_to: subscriptions}
   end
 
-  def start_link(_opts) do
-    GenStage.start_link(__MODULE__, [], name: __MODULE__)
+  def start_link(table_modules) do
+    GenStage.start_link(__MODULE__, table_modules, name: __MODULE__)
   end
 
   defp ask_and_schedule(producers, from) do

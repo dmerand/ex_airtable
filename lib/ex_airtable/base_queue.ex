@@ -58,14 +58,14 @@ defmodule ExAirtable.BaseQueue do
     {:noreply, events, %{state | requests: MapSet.new(remainder)}}
   end
 
-  def init(tables) when is_list(tables) do
-    {:producer, %__MODULE__{tables: tables}}
+  def init(table_modules) when is_list(table_modules) do
+    {:producer, %__MODULE__{tables: table_modules}}
   end
 
-  def start_link(tables) do
-    # We're assuming that all passed tables have the same base!
-    first_table = Enum.at(tables, 0)
+  def start_link(table_modules) do
+    # We're assuming that all passed table_modules have the same base!
+    first_table = Enum.at(table_modules, 0)
 
-    GenStage.start_link(__MODULE__, tables, name: id(first_table))
+    GenStage.start_link(__MODULE__, table_modules, name: id(first_table))
   end
 end
