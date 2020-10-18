@@ -68,42 +68,43 @@ defmodule ExAirtable do
       %ExAirtable.Airtable.List{}
   """
 
-  alias ExAirtable.{Airtable, TableCache}
+  alias ExAirtable.{Airtable, BaseQueue, TableCache}
+  alias ExAirtable.RateLimiter.Request
 
   @doc """
   Create a record in your Airtable. See `Service.create/2` for details.
   """
   def create(table, %Airtable.List{} = list) do
-    apply(table, :create, [list])
+    job = Request.create(
+      {table, :create, [list]}, 
+      {TableCache, :set_all, [table]}
+    )
+    BaseQueue.request(table, job)
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable
+  Delete a single record (by ID) from an Airtable. If successful, the record will be deleted from the cache as well.
   """
   def delete(table, id) when is_binary(id) do
-    apply(table, :delete, [id])
+    job = Request.create(
+      {table, :delete, [id]}, 
+      {TableCache, :delete, [table]}
+    )
+    BaseQueue.request(table, job)
   end
 	
   @doc """
-  Get all records from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.TableCache` (if one is started in the supervision tree). Prefer the cache if one exists.
+  Get all records from the table cache
   """
 	def list(table) do
-    try do
-      TableCache.list(table)
-    rescue
-      _ -> apply(table, :list, [])
-    end
+    TableCache.list(table)
 	end
 
   @doc """
-  Retrieve a single record from either an `ExAirtable.Table` (to query the Airtable API directly), or a corresponding `ExAirtable.TableCache` (if one is started in the supervision tree). Prefer the cache if one exists.
+  Retrieve a single record from the table cache.
   """
 	def retrieve(table, key) when is_binary(key) do
-    try do
-      TableCache.retrieve(table, key)
-    rescue
-      _ -> apply(table, :retrieve, [key])
-    end
+    TableCache.retrieve(table, key)
 	end
 
   @doc """
@@ -114,6 +115,10 @@ defmodule ExAirtable do
   See `Service.create/2` for more details about options that can be passed.
   """
   def update(table, %Airtable.List{} = list, opts \\ []) do
-    apply(table, :update, [list, opts])
+    job = Request.create(
+      {table, :update, [list, opts]}, 
+      {TableCache, :update, [table]}
+    )
+    BaseQueue.request(table, job)
   end
 end

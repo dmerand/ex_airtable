@@ -11,7 +11,7 @@ defmodule ExAirtable.TableCache do
       %Airtable.List{records: [%Airtable.Record{}, ...]}
   """
 
-  alias ExAirtable.{Airtable, TableCache, TableSynchronizer}
+  alias ExAirtable.{Airtable, TableSynchronizer}
   use GenServer
 
   defstruct table_module: nil, sync_ref: nil, sync_rate: nil
@@ -28,6 +28,13 @@ defmodule ExAirtable.TableCache do
   #
   # PUBLIC API
   #
+  
+  @doc """
+  Given an `ExAirtable.Table` module and an `Airtable.List` struct, remove each item in that struct from the cache.
+  """
+  def delete(table_module, %{"id" => id}) do
+    GenServer.cast(table_module, {:delete, id})
+  end
   
   @doc """
   Given an `ExAirtable.Table` module, get all `%Airtable.Record{}`s in that cache's table as an `%Airtable.List{}`.
@@ -79,11 +86,18 @@ defmodule ExAirtable.TableCache do
   end
 
   @doc """
-  Returns a valid ETS table name for a give `ExAirtable.Table` module.
+  Returns a valid ETS table name for a given `ExAirtable.Table` module.
   """
   def table_for(table_module) do
     table_module.base.id <> table_module.name()
     |> String.to_atom()
+  end
+
+  @doc """
+  Given an `ExAirtable.Table` module and an `Airtable.Record{}` struct, update the matching record in the cache, and insert it if it doesn't exist.
+  """
+  def update(table_module, %Airtable.List{} = list) do
+    GenServer.cast(table_module, {:update, list})
   end
 
   #
@@ -91,16 +105,34 @@ defmodule ExAirtable.TableCache do
   #
 
   @impl GenServer
+  def handle_cast({:delete, id}, %{table_module: table_module} = state) do
+    table_module
+    |> table_for()
+    |> :ets.delete(id)
+
+    {:noreply, state}
+  end
+
   def handle_cast({:set, id, item}, %{table_module: table_module} = state) do
     table_module
-    |> TableCache.table_for()
+    |> table_for()
     |> :ets.insert({id, item})
 
     {:noreply, state}
   end
 
   def handle_cast({:set_all, %Airtable.List{records: records}}, %{table_module: table_module} = state) do
-    Enum.each(records, &:ets.insert(TableCache.table_for(table_module), {&1.id, &1}))
+    Enum.each(records, &:ets.insert(table_for(table_module), {&1.id, &1}))
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:update, list}, %{table_module: table_module} = state) do
+    table = table_for(table_module)
+    Enum.each(list.records, fn record ->
+      :ets.delete(table, record.id)
+      :ets.insert(table, {record.id, record})
+    end)
 
     {:noreply, state}
   end

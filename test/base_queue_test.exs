@@ -2,7 +2,7 @@ defmodule ExAirtable.BaseQueueTest do
   use ExUnit.Case, async: true
 
   alias ExAirtable.BaseQueue
-  alias ExAirtable.RateLimiter.{Job, Request}
+  alias ExAirtable.RateLimiter.Request
 
   @table_module ExAirtable.MockTable
 
@@ -22,10 +22,10 @@ defmodule ExAirtable.BaseQueueTest do
   end
 
   test "Request buffer", %{pid: pid} do
-    request = %Request{
-      job: %Job{module: String, function: :to_atom, arguments: ["has_callback"]},
-      callback: %Job{module: Kernel, function: :send, arguments: [self()]}
-    }
+    request = Request.create(
+      {String, :to_atom, ["has_callback"]}, 
+      {Kernel, :send, [self()]}
+    )
     BaseQueue.request(@table_module, request)
 		# Sleeping because it's a cast.
     Process.sleep(10)

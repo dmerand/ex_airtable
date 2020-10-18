@@ -16,13 +16,13 @@ defmodule ExAirtable.Airtable.List do
 
 
   @doc """
-  Convert a typical Airtable JSON response into a %List{}
+  Convert a typical Airtable JSON response into a %List{}. Any weird response will return an empty list.
   """
-  def from_map(map) when is_map(map) do
+  def from_map(%{"records" => records} = map) do
     %__MODULE__{
-      records: Enum.map(map["records"], &Record.from_map/1),
+      records: Enum.map(records, &Record.from_map/1),
       offset: Map.get(map, "offset")
     }
   end
-  def from_map(other), do: other
+  def from_map(_other), do: %__MODULE__{}
 end

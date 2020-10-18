@@ -25,7 +25,9 @@ defmodule ExAirtable.Service do
   alias ExAirtable.{Airtable, Config}
 
   @doc """
-  Create a record in Airtable. Pass in a valid `%Airtable.List{}` struct.
+  Create a record in Airtable. Pass in a valid `%Airtable.List{}` struct. 
+  
+  Returns an `%Airtable.List{}` on success.
 
   ## Example
 

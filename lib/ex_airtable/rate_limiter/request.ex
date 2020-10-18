@@ -17,6 +17,21 @@ defmodule ExAirtable.RateLimiter.Request do
     job: Job.t(),
     callback: Job.t(),
   }
+  
+  @doc """
+  Create a request
+  """
+  def create({module, function, arguments}) do
+    %__MODULE__{
+      job: %Job{module: module, function: function, arguments: arguments}
+    }
+  end
+  def create({module, function, arguments}, {callback_module, callback_function, callback_arguments}) do
+    %__MODULE__{
+      job: %Job{module: module, function: function, arguments: arguments},
+      callback: %Job{module: callback_module, function: callback_function, arguments: callback_arguments}
+    }
+  end
 
   @doc """
   Run a given `%Request{}`, piping the result to the given callback function if any.

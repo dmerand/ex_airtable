@@ -2,7 +2,7 @@ defmodule ExAirtable.RateLimiterTest do
   use ExUnit.Case, async: true
 
   alias ExAirtable.{BaseQueue, RateLimiter}
-  alias ExAirtable.RateLimiter.{Job, Request}
+  alias ExAirtable.RateLimiter.Request
 
   @table_module ExAirtable.MockTable
 
@@ -18,10 +18,10 @@ defmodule ExAirtable.RateLimiterTest do
   end
 
   test "requests flow to rate limiter on sync_subscribe", %{base_queue: base_queue} do
-    request = %Request{
-      job: %Job{module: String, function: :to_atom, arguments: ["requests_flow"]},
-      callback: %Job{module: Kernel, function: :send, arguments: [self()]}
-    }
+    request = Request.create(
+      {String, :to_atom, ["requests_flow"]}, 
+      {Kernel, :send, [self()]}
+    )
 
     BaseQueue.request(@table_module, request)
     assert MapSet.member?(:sys.get_state(base_queue).state.requests, request)
@@ -32,10 +32,10 @@ defmodule ExAirtable.RateLimiterTest do
   end
 
   test "automatic subscription via passed table modules" do
-    request = %Request{
-      job: %Job{module: String, function: :to_atom, arguments: ["auto_subscription"]},
-      callback: %Job{module: Kernel, function: :send, arguments: [self()]}
-    }
+    request = Request.create(
+      {String, :to_atom, ["auto_subscription"]}, 
+      {Kernel, :send, [self()]}
+    )
 
     BaseQueue.request(@table_module, request)
     GenStage.start_link(RateLimiter, [@table_module])
@@ -46,10 +46,10 @@ defmodule ExAirtable.RateLimiterTest do
   @tag :external_api # because it's slow, and *technically* external :/
   test "only pulls 5 requests per wave", %{base_queue: base_queue} do
     Enum.each(1..6, fn i ->
-      request = %Request{
-        job: %Job{module: String, function: :to_atom, arguments: ["request_#{i}"]},
-        callback: %Job{module: Kernel, function: :send, arguments: [self()]}
-      }
+      request = Request.create(
+        {String, :to_atom, ["request_#{i}"]}, 
+        {Kernel, :send, [self()]}
+      )
       BaseQueue.request(@table_module, request)
     end)
 

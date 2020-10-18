@@ -20,9 +20,9 @@ defmodule ExAirtable.Airtable.Record do
   """
   def from_map(map) when is_map(map) do
     %__MODULE__{
-      id: map["id"],
-      fields: map["fields"],
-      createdTime: map["createdTime"]
+      id: Map.get(map, "id"),
+      fields: Map.get(map, "fields", []),
+      createdTime: Map.get(map, "createdTime")
     }
   end
   def from_map(other), do: other
