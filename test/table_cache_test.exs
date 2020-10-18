@@ -57,14 +57,14 @@ defmodule ExAirtable.TableCacheTest do
     TableCache.set(@table_module, record.id, record)
     updated_record = %{record | fields: %{update_existing: true}}
 
-    TableCache.update(@table_module, updated_record)
+    TableCache.update(@table_module, %List{records: [updated_record]})
     Process.sleep(20) # Give it a moment, since it's a cast
     assert {:ok, ^updated_record} = TableCache.retrieve(@table_module, record.id)
   end
 
   test "upsert" do
     record = %Record{id: "1", fields: %{upsert: true}}
-    TableCache.update(@table_module, record)
+    TableCache.update(@table_module, %List{records: [record]})
     Process.sleep(20) # Give it a moment, since it's a cast
     assert {:ok, ^record} = TableCache.retrieve(@table_module, record.id)
   end
