@@ -26,4 +26,11 @@ defmodule ExAirtable.Airtable.Record do
     }
   end
   def from_map(other), do: other
+
+  @doc """
+  Retrieve a field from within a record's fields. Returns `nil` by default if no field matches.
+  """
+  def get(%__MODULE__{} = record, field, default \\ nil) do
+    Map.get(record.fields, field, default)
+  end
 end

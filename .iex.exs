@@ -1,2 +1,2 @@
-alias ExAirtable.Cache
+alias ExAirtable.Airtable
 alias ExAirtable.Example.EnvTable

@@ -80,19 +80,32 @@ defmodule ExAirtable do
 
       # first, run `make console`, then...
      
-      # to retrieve data directly from Airtable's API...
+      # retrieve data directly from Airtable's API...
       iex> EnvTable.list
       %ExAirtable.Airtable.List{records: [%Record{}, %Record{}, ...]}
 
       iex> EnvTable.retrieve("rec12345")
       %ExAirtable.Airtable.Record{}
 
-      # to start a caching server for your table...
-      iex> ExAirtable.TableCache.start_link(table_module: EnvTable, sync_rate: :timer.seconds(5))
+      # start a caching and rate-limiting server 
+      iex> ExAirtable.Supervisor.start_link(EnvTable)
 
-      # to get all records from the cache (without hitting the Airtable API)
-      iex> TableCache.get_all(EnvTable)
+      # get all records from the cache (without hitting the Airtable API)
+      iex> ExAirtable.list(EnvTable)
       %ExAirtable.Airtable.List{}
+    
+  Because certain tasks such as retrieving fields and finding related data happen so often, we put in a few convenience functions to make those jobs easier.
+
+      # grab a field from a record
+      iex> ExAirtable.Airtable.Record.get(record, "Users")
+      ["rec1234", "rec3456"]
+
+      # find related table data based on a record ID
+      iex> ExAirtable.Airtable.List.filter_relations(list, "Users", "rec1234")
+      [%Record{fields: %{"Users" => ["rec1234", "rec3456"]}}, ...]
+
+  See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information.
+      
   """
 
   alias ExAirtable.{Airtable, BaseQueue, TableCache}
