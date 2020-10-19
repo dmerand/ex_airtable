@@ -156,6 +156,14 @@ defmodule ExAirtable do
 	end
 
   @doc """
+  Same as `list/0`, but raises on error.
+  """
+	def list!(table_module) do
+    {:ok, list} = TableCache.list(table_module)
+    list
+	end
+
+  @doc """
   Retrieve a single record from the table module's cache.
 
   ## Examples
@@ -165,6 +173,14 @@ defmodule ExAirtable do
   """
 	def retrieve(table_module, key) when is_binary(key) do
     TableCache.retrieve(table_module, key)
+	end
+
+  @doc """
+  Same as `retrieve/1`, but raises on error.
+  """
+	def retrieve!(table_module, key) when is_binary(key) do
+    {:ok, record} = TableCache.retrieve(table_module, key)
+    record
 	end
 
   @doc """
