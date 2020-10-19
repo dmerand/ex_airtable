@@ -88,7 +88,7 @@ The codebase includes an example `Table` (`ExAirtable.Example.EnvTable`) that yo
     %ExAirtable.Airtable.Record{}
 
     # start a caching and rate-limiting server 
-    iex> ExAirtable.Supervisor.start_link(EnvTable)
+    iex> ExAirtable.Supervisor.start_link([EnvTable])
 
     # get all records from the cache (without hitting the Airtable API)
     iex> ExAirtable.list(EnvTable)
