@@ -16,7 +16,6 @@ defmodule ExAirtable.TableSynchronizer do
   }
 
   use GenServer
-  require Logger
   alias ExAirtable.{BaseQueue, TableCache}
   alias ExAirtable.RateLimiter.Request
 
@@ -38,8 +37,6 @@ defmodule ExAirtable.TableSynchronizer do
 
   @impl GenServer
   def handle_info(:sync, %{table_module: table_module} = state) do
-    Logger.debug "Synching #{inspect table_module}..."
-
     job = Request.create(
       {state.table_module, :list_async, []}, 
       {TableCache, :push_paginated_list, [table_module]}

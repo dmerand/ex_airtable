@@ -195,7 +195,7 @@ defmodule ExAirtable.TableCache do
 
     state = %__MODULE__{
       table_module: table_module, 
-      sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(60))
+      sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(15))
     }
     state = %{state | sync_ref: case Keyword.get(opts, :skip_sync) do
         true -> nil

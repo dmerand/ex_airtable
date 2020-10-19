@@ -2,6 +2,10 @@ defmodule ExAirtable do
   @moduledoc """
   Provides an interface to query Airtable bases/tables, and an optional server to cache the results of a table into memory for faster access and to avoid Airtable API access limitations.
 
+  The preferred mode of operation is to run in rate-limited and cached mode, to ensure that no API limitations are hit. The functions in this module will operate through the rate-limiter and cache by default.
+
+  If you wish to skip rate-limiting and caching, you can simply hit the Airtable API directly and get nicely-wrapped results by using the `Table` endpoints directly (see below for setup).
+
   ## Setup
 
   Generally, you'll need to do two things:
@@ -22,9 +26,23 @@ defmodule ExAirtable do
         def name, do: "Table Name"
       end
 
-  ## Caching
+  With this table, you can hit the API directly (skipping rate-limiting and caching) like so:
 
-  To run a local caching server, you can include a reference to the `ExAirtable` cache server in your supervision tree, for example:
+      iex> MyApp.MyAirtable.list()
+      %Airtable.List{}
+
+      iex> MyApp.MyAirtable.retrieve("rec12345")
+      %Airtable.Record{}
+
+  ## Rate-Limiting and Caching
+
+  Activating the `ExAirtable.Supervisor` in your supervision tree (passing it any tables you've defined as above) confers a few advantages:
+
+  1. All tables are automatically synchronized to a local (ETS) cache for much faster local response times.
+  2. All requests are automatically rate-limited (5 requests per second per Airtable base) so as not to exceed Airtable API rate limits.
+  3. Record creation requests are automatically split into batches of 10 (Airtable will reject larger requests)
+
+  To run a local caching server, you can include a reference to the `ExAirtable` supervisor in your supervision tree, for example:
 
       defmodule My.Application do
         use Application
@@ -33,9 +51,8 @@ defmodule ExAirtable do
           children = [
             # ...
 
-            # cache processes
-            {ExAirtable.TableCache, table_module: MyApp.MyAirtable},
-            {ExAirtable.TableCache, table_module: MyApp.MyOtherAirtable},
+            # Configure caching and rate-limiting processes
+            {ExAirtable.Supervisor, [MyApp.MyAirtable, MyApp.MyOtherAirtable, ...]},
 
             # ...
           ]
@@ -47,7 +64,7 @@ defmodule ExAirtable do
         # ...
       end
 
-  ## Examples
+  ## Examples + Playing Around
 
   The codebase includes an example `Table` (`ExAirtable.Example.EnvTable`) that you can use to play around and get an idea of how the system works. This module uses environment variables as configuration. The included `Makefile` provides some quick command-line tools to run tests and a console with those environment variables pre-loaded. Simply edit the relevant environment variables in `Makefile` to point to a valid base/table name, and you'll be able to interact directly like this:
 
