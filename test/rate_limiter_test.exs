@@ -45,7 +45,7 @@ defmodule ExAirtable.RateLimiterTest do
 
   @tag :external_api # because it's slow, and *technically* external :/
   test "only pulls 5 requests per wave", %{base_queue: base_queue} do
-    Enum.each(1..6, fn i ->
+    Enum.each(1..15, fn i ->
       request = Request.create(
         {String, :to_atom, ["request_#{i}"]}, 
         {Kernel, :send, [self()]}
@@ -55,11 +55,11 @@ defmodule ExAirtable.RateLimiterTest do
 
     GenStage.sync_subscribe(RateLimiter, to: BaseQueue.id(@table_module))
 
-    assert 1 = Enum.count(:sys.get_state(base_queue).state.requests)
-    assert_receive :request_1, 100
-    refute_receive :request_6, 100
-
-    assert_receive :request_6, 1000
+    Process.sleep(100)
+    assert 10 = Enum.count(:sys.get_state(base_queue).state.requests)
+    Process.sleep(1000)
+    assert 5 = Enum.count(:sys.get_state(base_queue).state.requests)
+    Process.sleep(1000)
     assert 0 = Enum.count(:sys.get_state(base_queue).state.requests)
   end
 end

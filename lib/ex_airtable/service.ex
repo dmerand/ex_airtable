@@ -78,6 +78,14 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
+  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests.
+  """
+  def list_async(%Config.Table{} = table, opts \\ []) do
+    perform_request(table, opts)
+    |> Airtable.List.from_map()
+  end
+
+  @doc """
   Get a single record from a `%Config.Table{}`, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do

@@ -5,7 +5,7 @@ defmodule ExAirtable.TableTest do
 
   test "use" do
     assert %Config.Base{} = MockTable.base()
-    assert MockTable.name() == "Videos"
+    assert MockTable.name() == System.get_env("TABLE_NAME")
   end
 
   test "get by ID" do

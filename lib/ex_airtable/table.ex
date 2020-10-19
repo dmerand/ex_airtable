@@ -54,6 +54,13 @@ defmodule ExAirtable.Table do
         Service.list table(), opts
       end
 
+      @doc """
+      Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. Typically called automatically by a TableSynchronizer
+      """
+      def list_async(opts \\ []) do
+        Service.list_async table(), opts
+      end
+
       # Make overrideable for testing mocks
       defoverridable list: 1
 

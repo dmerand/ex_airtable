@@ -54,6 +54,34 @@ defmodule ExAirtable.TableCache do
     end
   end
 
+  def push_paginated_list(table_module, %Airtable.List{offset: offset} = list) when is_binary(offset) do
+    new_list = case retrieve(table_module, "paginated_list") do
+      {:ok, existing_list} -> 
+        %{existing_list | records: existing_list.records ++ list.records}
+      _ ->
+        list
+    end
+
+    #TODO: This is bad separation of concerns. This should probably be elsewhere.
+    job = ExAirtable.RateLimiter.Request.create(
+      {table_module, :list_async, [[params: [offset: offset]]]}, 
+      {__MODULE__, :push_paginated_list, [table_module]}
+    )
+    ExAirtable.BaseQueue.request(table_module, job)
+
+    GenServer.cast(table_module, {:set, "paginated_list", new_list})
+  end
+
+  def push_paginated_list(table_module, %Airtable.List{offset: offset} = list) when is_nil(offset) do
+    new_list = case retrieve(table_module, "paginated_list") do
+      {:ok, existing_list} -> 
+        %{existing_list | records: existing_list.records ++ list.records}
+      _ ->
+        list
+    end
+    set_all(table_module, new_list)
+    delete(table_module, %{"id" => "paginated_list"})
+  end
 
   @doc """
   Given an `ExAirtable.Table` module and a string key, get the %Record{} in that cache with the matching key.
@@ -167,7 +195,7 @@ defmodule ExAirtable.TableCache do
 
     state = %__MODULE__{
       table_module: table_module, 
-      sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(30))
+      sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(60))
     }
     state = %{state | sync_ref: case Keyword.get(opts, :skip_sync) do
         true -> nil
