@@ -65,6 +65,14 @@ To run a local caching server, you can include a reference to the `ExAirtable` s
 
       # ...
     end
+    
+Once you have configured things this way, you can call `ExAirtable` directly, and get all of the speed and reliability benefits of caching and rate-limiting.
+
+    iex> ExAirtable.list(MyApp.MyAirtable)
+    {:ok, %ExAirtable.Airtable.List{}}
+    
+    iex> ExAirtable.retrieve(MyApp.MyAirtable, "rec12345")
+    {:ok, %ExAirtable.Airtable.Record{}}
 
 ## Examples + Playing Around
 
