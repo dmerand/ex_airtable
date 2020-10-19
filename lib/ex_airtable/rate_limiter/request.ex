@@ -1,6 +1,6 @@
 defmodule ExAirtable.RateLimiter.Request do
   @moduledoc """
-  The RateLimiter takes a `%Request{}`, runs its `:job` and sends the results to the `:callback` function as arguments. 
+  The RateLimiter takes a `%Request{}`, runs its `:job` and (optionally) sends the results to the `:callback` function as arguments. 
   
   Any arguments defined in the `:callback` `%Job{}` will be prepended to the function arguments, with the results of `:job` being the final argument passed.
   """
@@ -34,7 +34,7 @@ defmodule ExAirtable.RateLimiter.Request do
   end
 
   @doc """
-  Run a given `%Request{}`, piping the result to the given callback function if any.
+  Run a given `%Request{}`, piping the result to the given callback function (if any).
 
   If arguments are given in the request.callback, then the result of running the request.job will be the final argument after the arguments specified in the callback.
   """

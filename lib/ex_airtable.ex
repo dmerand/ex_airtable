@@ -59,7 +59,7 @@ defmodule ExAirtable do
             # ...
           ]
 
-          opts = [strategy: :one_for_one, name: PhoenixCms.Supervisor]
+          opts = [strategy: :one_for_one, name: MyApplication.Supervisor]
           Supervisor.start_link(children, opts)
         end
 

@@ -1,6 +1,6 @@
 defmodule ExAirtable.TableCache do
   @moduledoc """
-  A caching server for an `ExAirtable.Table`. Given a `Table` when initialized, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
+  A caching server for an `ExAirtable.Table`. Given a module name that implements the `Table` behaviour, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
 
   ## Examples
       
@@ -30,7 +30,7 @@ defmodule ExAirtable.TableCache do
   #
   
   @doc """
-  Given an `ExAirtable.Table` module and an `Airtable.List` struct, remove each item in that struct from the cache.
+  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID.
   """
   def delete(table_module, %{"id" => id}) do
     GenServer.cast(table_module, {:delete, id})
@@ -54,6 +54,11 @@ defmodule ExAirtable.TableCache do
     end
   end
 
+  @doc """
+  Given an `ExAirtable.Table` module, and a list result, store that result for later cache replacement.
+
+  This function is typically called by an asycn "crawler" process to accumulate paginated data from Airtable's list method.
+  """
   def push_paginated_list(table_module, %Airtable.List{offset: offset} = list) when is_binary(offset) do
     new_list = case retrieve(table_module, "paginated_list") do
       {:ok, existing_list} -> 

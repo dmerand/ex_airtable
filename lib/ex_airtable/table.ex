@@ -54,15 +54,15 @@ defmodule ExAirtable.Table do
         Service.list table(), opts
       end
 
+      # Make overrideable for testing mocks
+      defoverridable list: 1
+
       @doc """
       Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. Typically called automatically by a TableSynchronizer
       """
       def list_async(opts \\ []) do
         Service.list_async table(), opts
       end
-
-      # Make overrideable for testing mocks
-      defoverridable list: 1
 
       @doc """
       Get a single record from your Airtable, matching by ID. See `Service.retrieve/2` for details.
@@ -82,7 +82,7 @@ defmodule ExAirtable.Table do
       end
 
       @doc """
-      Update a record in your Airtable. See `Service.create/2` for details.
+      Update a record in your Airtable. See `Service.update` for details.
       """
       def update(%Airtable.List{} = list, opts \\ []) do
         Service.update table(), list, opts

@@ -1,8 +1,10 @@
 defmodule ExAirtable.Service do
   @moduledoc """
-  This module is where we directly hit the Airtable API. Most methods take an `Airtable.Config.Table{}`, along with parameters to be forwarded to the REST API.
+  The `Service` is where we directly hit the Airtable API. Most methods take an `Airtable.Config.Table{}`, along with parameters to be forwarded to the REST API.
 
   These methods can be called directly, provided you have a valid `%ExAirtable.Config.Table{}` configuration. Alternatively, you can define a module that "inherits" this behavior - see `ExAirtable.Table` for more details.
+
+  API results will be returned in `ExAirtable.Airtable.List{}` and `ExAirtable.Airtable.Record{}` structs, to match what the Airtable API returns.
 
   ## Examples
     
@@ -48,7 +50,9 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable
+  Delete a single record (by ID) from an Airtable.
+
+  Returns a custom map on success - see below.
 
   ## Example
       
@@ -60,7 +64,7 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Get all records from a `%Config.Table{}`. Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
+  List all records. Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
 
   Valid options are:
 
@@ -74,11 +78,11 @@ defmodule ExAirtable.Service do
   def list(%Config.Table{} = table, opts \\ []) do
     perform_request(table, opts)
     |> Airtable.List.from_map()
-    |> append_to_paginated_list(table, opts)
+    |> push_to_paginated_list(table, opts)
   end
 
   @doc """
-  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests.
+  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests. This is typically utilized by cache processes rather than called by hand - although it could be used by hand if you only want one page of results.
   """
   def list_async(%Config.Table{} = table, opts \\ []) do
     perform_request(table, opts)
@@ -86,7 +90,7 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Get a single record from a `%Config.Table{}`, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
+  Get a single record, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do
     perform_request(table, url_suffix: "/" <> id)
@@ -116,7 +120,7 @@ defmodule ExAirtable.Service do
     |> Airtable.List.from_map()
   end
 
-  defp append_to_paginated_list(%Airtable.List{offset: offset} = list, %Config.Table{} = table, opts) when is_binary(offset) do
+  defp push_to_paginated_list(%Airtable.List{offset: offset} = list, %Config.Table{} = table, opts) when is_binary(offset) do
     params = Keyword.get(opts, :params, %{}) |> Map.put(:offset, offset)
     opts = Keyword.put(opts, :params, params)
     new_list = list(table, opts)
@@ -129,7 +133,7 @@ defmodule ExAirtable.Service do
         new_list
     end
   end
-  defp append_to_paginated_list(list, _table, _opts), do: list
+  defp push_to_paginated_list(list, _table, _opts), do: list
 
   defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
     table.base.endpoint_url <> "/" <> 

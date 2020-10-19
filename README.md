@@ -59,7 +59,7 @@ To run a local caching server, you can include a reference to the `ExAirtable` s
           # ...
         ]
 
-        opts = [strategy: :one_for_one, name: PhoenixCms.Supervisor]
+        opts = [strategy: :one_for_one, name: MyApplication.Supervisor]
         Supervisor.start_link(children, opts)
       end
 
