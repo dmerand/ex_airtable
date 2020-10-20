@@ -4,10 +4,13 @@ defmodule ExAirtable.MixProject do
   def project do
     [
       app: :ex_airtable,
+      name: "ExAirtable",
+      description: description(),
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      source_url: "https://github.com/exploration/ex_airtable"
     ]
   end
 
@@ -16,6 +19,12 @@ defmodule ExAirtable.MixProject do
     [
       extra_applications: [:logger]
     ]
+  end
+
+  defp description do
+    """
+    An Airtable API interface that optionally provides a rate-limiting server and a local cache.
+    """
   end
 
   # Run "mix help deps" to learn about dependencies.
