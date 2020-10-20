@@ -12,10 +12,6 @@ help:
 console:
 	@$(ENV) iex -S mix
 
-# Format the codebase
-format:
-	mix format lib/**.ex*
-
 # Run every damned test we've got, except the mutations
 tests:
 	@$(ENV) mix test --include external_api --exclude external_mutation
