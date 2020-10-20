@@ -14,7 +14,7 @@ defmodule ExAirtable.TableCache do
   alias ExAirtable.{Airtable, TableSynchronizer}
   use GenServer
 
-  defstruct table_module: nil, sync_ref: nil, sync_rate: nil
+  defstruct table_module: nil, sync_ref: nil, sync_rate: nil, delete_on_refresh: true
 
   @typedoc """
   A struct that contains the state for a `TableCache`.
@@ -22,7 +22,8 @@ defmodule ExAirtable.TableCache do
   @type t :: %__MODULE__{
           table_module: module(),
           sync_ref: pid(),
-          sync_rate: integer()
+          sync_rate: integer(),
+          delete_on_refresh: boolean()
         }
 
   #
@@ -30,10 +31,17 @@ defmodule ExAirtable.TableCache do
   #
 
   @doc """
-  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID.
+  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID. This is an asynchronous operation.
   """
   def delete(table_module, %{"id" => id}) do
     GenServer.cast(table_module, {:delete, id})
+  end
+
+  @doc """
+  Clear all records from the given GenServer. This is a synchronous operation.
+  """
+  def delete_all(table_module) do
+    GenServer.call(table_module, :delete_all)
   end
 
   @doc """
@@ -58,7 +66,7 @@ defmodule ExAirtable.TableCache do
   @doc """
   Given an `ExAirtable.Table` module, and a list result, store that result for later cache replacement.
 
-  This function is typically called by an asycn "crawler" process to accumulate paginated data from Airtable's list method.
+  This function is typically called by an async "crawler" process to accumulate paginated data from Airtable's list method.
   """
   def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
       when is_binary(offset) do
@@ -94,8 +102,14 @@ defmodule ExAirtable.TableCache do
           list
       end
 
-    set_all(table_module, new_list)
-    delete(table_module, %{"id" => "paginated_list"})
+    case GenServer.call(table_module, :get_state) do
+      %{delete_on_refresh: true} ->
+        delete_all(table_module)
+        set_all(table_module, new_list)
+      _ ->
+        set_all(table_module, new_list)
+        delete(table_module, %{"id" => "paginated_list"})
+    end
   end
 
   @doc """
@@ -146,6 +160,17 @@ defmodule ExAirtable.TableCache do
   #
   # GENSERVER 
   #
+  
+  @impl GenServer
+  def handle_call(:delete_all, _from, %{table_module: table_module} = state) do
+    :ets.delete_all_objects(table_for(table_module))
+
+    {:reply, state, state}
+  end
+
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
+  end
 
   @impl GenServer
   def handle_cast({:delete, id}, %{table_module: table_module} = state) do
@@ -194,16 +219,6 @@ defmodule ExAirtable.TableCache do
     {:noreply, state}
   end
 
-  defp initialize_synchronizer(state) do
-    {:ok, pid} =
-      TableSynchronizer.start_link(
-        table_module: state.table_module,
-        sync_rate: state.sync_rate
-      )
-
-    Process.monitor(pid)
-  end
-
   @impl GenServer
   @doc """
   Initialize the caching server. This is not meant to be called manually, but will be handle when `start_link/1` is called.
@@ -216,7 +231,8 @@ defmodule ExAirtable.TableCache do
 
     state = %__MODULE__{
       table_module: table_module,
-      sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(15))
+      delete_on_refresh: Keyword.get(opts, :delete_on_refresh, true),
+      sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(30))
     }
 
     state = %{
@@ -242,5 +258,15 @@ defmodule ExAirtable.TableCache do
   """
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: Keyword.fetch!(opts, :table_module))
+  end
+
+  defp initialize_synchronizer(state) do
+    {:ok, pid} =
+      TableSynchronizer.start_link(
+        table_module: state.table_module,
+        sync_rate: state.sync_rate
+      )
+
+    Process.monitor(pid)
   end
 end

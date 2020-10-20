@@ -1,8 +1,9 @@
 defmodule ExAirtable do
   @moduledoc """
+
   Provides an interface to query Airtable bases/tables, and an optional server to cache the results of a table into memory for faster access and to avoid Airtable API access limitations.
 
-  The preferred mode of operation is to run in rate-limited and cached mode, to ensure that no API limitations are hit. The functions in this module will operate through the rate-limiter and cache by default.
+  The preferred mode of operation is to run in rate-limited and cached mode, to ensure that no API limitations are hit. The functions in the `ExAirtable` base module will operate through the rate-limiter and cache by default.
 
   If you wish to skip rate-limiting and caching, you can simply hit the Airtable API directly and get nicely-wrapped results by using the `Table` endpoints directly (see below for setup).
 
@@ -28,7 +29,7 @@ defmodule ExAirtable do
         def name, do: "Table Name"
       end
 
-  With this table, you can hit the API directly (skipping rate-limiting and caching) like so:
+  With this module defined, you can hit the API directly (skipping rate-limiting and caching) like so:
 
       iex> MyApp.MyAirtable.list()
       %Airtable.List{}
@@ -42,7 +43,7 @@ defmodule ExAirtable do
 
   1. All tables are automatically synchronized to a local (ETS) cache for much faster local response times.
   2. All requests are automatically rate-limited (5 requests per second per Airtable base) so as not to exceed Airtable API rate limits.
-  3. Record creation requests are automatically split into batches of 10 (Airtable will reject larger requests)
+  3. Record creation requests are automatically split into batches of 10 (Airtable will reject larger requests).
 
   To run a local caching server, you can include a reference to the `ExAirtable` supervisor in your supervision tree, for example:
 
@@ -54,7 +55,7 @@ defmodule ExAirtable do
             # ...
 
             # Configure caching and rate-limiting processes
-            {ExAirtable.Supervisor, [MyApp.MyAirtable, MyApp.MyOtherAirtable, ...]},
+            {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], [delete_on_refresh: false, sync_rate: :timer.seconds(15)]}},
 
             # ...
           ]
@@ -66,6 +67,8 @@ defmodule ExAirtable do
         # ...
       end
       
+  Note that the `:sync_rate` (the rate at which tables are refreshed from Airtable) is optional and will default to 30 seconds if omitted. Similarly `:delete_on_refresh` defaults to `true`, meaning that each sync from Airtable will destroy and re-create the local cache. Set it to `false` to keep your cache from churning too hard if you don't need to sync deletions that happen on the Airtable side in real-time.
+
   Once you have configured things this way, you can call `ExAirtable` directly, and get all of the speed and reliability benefits of caching and rate-limiting.
 
       iex> ExAirtable.list(MyApp.MyAirtable)
@@ -93,7 +96,7 @@ defmodule ExAirtable do
       # get all records from the cache (without hitting the Airtable API)
       iex> ExAirtable.list(EnvTable)
       %ExAirtable.Airtable.List{}
-    
+      
   Because certain tasks such as retrieving fields and finding related data happen so often, we put in a few convenience functions to make those jobs easier.
 
       # grab a field from a record
@@ -105,7 +108,6 @@ defmodule ExAirtable do
       [%Record{fields: %{"Users" => ["rec1234", "rec3456"]}}, ...]
 
   See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information.
-      
   """
 
   alias ExAirtable.{Airtable, BaseQueue, TableCache}
