@@ -1,6 +1,6 @@
 API_KEY=REDACTED
 BASE_ID=REDACTED
-TABLE_NAME=YOURTABLENAME
+TABLE_NAME=REDACTED
 ENV=env API_KEY=$(API_KEY) \
 	BASE_ID=$(BASE_ID) \
 	TABLE_NAME=$(TABLE_NAME)
@@ -11,6 +11,10 @@ help:
 # Run a console with external APIs activated
 console:
 	@$(ENV) iex -S mix
+
+# Format the codebase
+format:
+	mix format lib/**.ex*
 
 # Run every damned test we've got, except the mutations
 tests:
