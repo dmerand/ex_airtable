@@ -20,22 +20,22 @@ defmodule ExAirtable.TableCache do
   A struct that contains the state for a `TableCache`.
   """
   @type t :: %__MODULE__{
-    table_module: module(),
-    sync_ref: pid(),
-    sync_rate: integer()
-  }
+          table_module: module(),
+          sync_ref: pid(),
+          sync_rate: integer()
+        }
 
   #
   # PUBLIC API
   #
-  
+
   @doc """
   Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID.
   """
   def delete(table_module, %{"id" => id}) do
     GenServer.cast(table_module, {:delete, id})
   end
-  
+
   @doc """
   Given an `ExAirtable.Table` module, get all `%Airtable.Record{}`s in that cache's table as an `%Airtable.List{}`.
   """
@@ -45,9 +45,10 @@ defmodule ExAirtable.TableCache do
     |> :ets.tab2list()
     |> case do
       values when values != [] ->
-        {:ok, %Airtable.List{
-          records: Enum.map(values, &elem(&1, 1))
-        }}
+        {:ok,
+         %Airtable.List{
+           records: Enum.map(values, &elem(&1, 1))
+         }}
 
       _ ->
         {:error, :not_found}
@@ -59,31 +60,40 @@ defmodule ExAirtable.TableCache do
 
   This function is typically called by an asycn "crawler" process to accumulate paginated data from Airtable's list method.
   """
-  def push_paginated_list(table_module, %Airtable.List{offset: offset} = list) when is_binary(offset) do
-    new_list = case retrieve(table_module, "paginated_list") do
-      {:ok, existing_list} -> 
-        %{existing_list | records: existing_list.records ++ list.records}
-      _ ->
-        list
-    end
+  def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
+      when is_binary(offset) do
+    new_list =
+      case retrieve(table_module, "paginated_list") do
+        {:ok, existing_list} ->
+          %{existing_list | records: existing_list.records ++ list.records}
 
-    #TODO: This is bad separation of concerns. This should probably be elsewhere.
-    job = ExAirtable.RateLimiter.Request.create(
-      {table_module, :list_async, [[params: [offset: offset]]]}, 
-      {__MODULE__, :push_paginated_list, [table_module]}
-    )
+        _ ->
+          list
+      end
+
+    # TODO: This is bad separation of concerns. This should probably be elsewhere.
+    job =
+      ExAirtable.RateLimiter.Request.create(
+        {table_module, :list_async, [[params: [offset: offset]]]},
+        {__MODULE__, :push_paginated_list, [table_module]}
+      )
+
     ExAirtable.BaseQueue.request(table_module, job)
 
     GenServer.cast(table_module, {:set, "paginated_list", new_list})
   end
 
-  def push_paginated_list(table_module, %Airtable.List{offset: offset} = list) when is_nil(offset) do
-    new_list = case retrieve(table_module, "paginated_list") do
-      {:ok, existing_list} -> 
-        %{existing_list | records: existing_list.records ++ list.records}
-      _ ->
-        list
-    end
+  def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
+      when is_nil(offset) do
+    new_list =
+      case retrieve(table_module, "paginated_list") do
+        {:ok, existing_list} ->
+          %{existing_list | records: existing_list.records ++ list.records}
+
+        _ ->
+          list
+      end
+
     set_all(table_module, new_list)
     delete(table_module, %{"id" => "paginated_list"})
   end
@@ -122,7 +132,7 @@ defmodule ExAirtable.TableCache do
   Returns a valid ETS table name for a given `ExAirtable.Table` module.
   """
   def table_for(table_module) do
-    table_module.base.id <> table_module.name()
+    (table_module.base.id <> table_module.name())
     |> String.to_atom()
   end
 
@@ -154,7 +164,10 @@ defmodule ExAirtable.TableCache do
     {:noreply, state}
   end
 
-  def handle_cast({:set_all, %Airtable.List{records: records}}, %{table_module: table_module} = state) do
+  def handle_cast(
+        {:set_all, %Airtable.List{records: records}},
+        %{table_module: table_module} = state
+      ) do
     table = table_for(table_module)
     Enum.each(records, &:ets.insert(table, {&1.id, &1}))
 
@@ -163,6 +176,7 @@ defmodule ExAirtable.TableCache do
 
   def handle_cast({:update, list}, %{table_module: table_module} = state) do
     table = table_for(table_module)
+
     Enum.each(list.records, fn record ->
       :ets.delete(table, record.id)
       :ets.insert(table, {record.id, record})
@@ -172,7 +186,7 @@ defmodule ExAirtable.TableCache do
   end
 
   @impl GenServer
-  def handle_info( {:DOWN, ref, :process, _object, _reason}, %{sync_ref: ref} = state) do
+  def handle_info({:DOWN, ref, :process, _object, _reason}, %{sync_ref: ref} = state) do
     {:noreply, %{state | sync_ref: initialize_synchronizer(state)}}
   end
 
@@ -181,10 +195,12 @@ defmodule ExAirtable.TableCache do
   end
 
   defp initialize_synchronizer(state) do
-    {:ok, pid} = TableSynchronizer.start_link(
-      table_module: state.table_module, 
-      sync_rate: state.sync_rate
-    )
+    {:ok, pid} =
+      TableSynchronizer.start_link(
+        table_module: state.table_module,
+        sync_rate: state.sync_rate
+      )
+
     Process.monitor(pid)
   end
 
@@ -199,13 +215,18 @@ defmodule ExAirtable.TableCache do
     :ets.new(table_for(table_module), [:ordered_set, :protected, :named_table])
 
     state = %__MODULE__{
-      table_module: table_module, 
+      table_module: table_module,
       sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(15))
     }
-    state = %{state | sync_ref: case Keyword.get(opts, :skip_sync) do
-        true -> nil
-        _ -> initialize_synchronizer(state)
-    end}
+
+    state = %{
+      state
+      | sync_ref:
+          case Keyword.get(opts, :skip_sync) do
+            true -> nil
+            _ -> initialize_synchronizer(state)
+          end
+    }
 
     {:ok, state}
   end

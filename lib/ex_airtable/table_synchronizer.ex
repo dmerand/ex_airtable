@@ -11,9 +11,9 @@ defmodule ExAirtable.TableSynchronizer do
   A struct that contains the state for a `TableSynchronizer`
   """
   @type t :: %__MODULE__{
-    table_module: module(),
-    sync_rate: integer()
-  }
+          table_module: module(),
+          sync_rate: integer()
+        }
 
   use GenServer
   alias ExAirtable.{BaseQueue, TableCache}
@@ -37,12 +37,14 @@ defmodule ExAirtable.TableSynchronizer do
 
   @impl GenServer
   def handle_info(:sync, %{table_module: table_module} = state) do
-    job = Request.create(
-      {state.table_module, :list_async, []}, 
-      {TableCache, :push_paginated_list, [table_module]}
-    )
+    job =
+      Request.create(
+        {state.table_module, :list_async, []},
+        {TableCache, :push_paginated_list, [table_module]}
+      )
+
     BaseQueue.request(state.table_module, job)
-    
+
     schedule(state)
 
     {:noreply, state}
@@ -51,5 +53,4 @@ defmodule ExAirtable.TableSynchronizer do
   defp schedule(state) do
     Process.send_after(self(), :sync, state.sync_rate)
   end
-
 end

@@ -16,9 +16,9 @@ defmodule ExAirtable.BaseQueue do
   Each BaseQueue stores a list of tables and all pending requests against that base, as well as the GenServer ID of the BaseQueue.
   """
   @type t :: %__MODULE__{
-    tables: [module()],
-    requests: MapSet.t(Request.t())
-  }
+          tables: [module()],
+          requests: MapSet.t(Request.t())
+        }
 
   #
   # PUBLIC API
@@ -28,7 +28,7 @@ defmodule ExAirtable.BaseQueue do
   Retrieve the BaseQueue (GenServer) ID for a given table.
   """
   def id(table) do
-    "BaseQueue-" <> table.base().id
+    ("BaseQueue-" <> table.base().id)
     |> String.to_atom()
   end
 
@@ -50,7 +50,7 @@ defmodule ExAirtable.BaseQueue do
   end
 
   def handle_demand(demand, state) when demand > 0 do
-    {events, remainder} = 
+    {events, remainder} =
       state.requests
       |> MapSet.to_list()
       |> Enum.split(demand)

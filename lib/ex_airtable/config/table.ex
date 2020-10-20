@@ -11,7 +11,7 @@ defmodule ExAirtable.Config.Table do
   A configuration for an Airtable Table - a reference to a `%Base{}` and a name.
   """
   @type t :: %__MODULE__{
-    base: Config.Base.t(),
-    name: String.t()
-  }
+          base: Config.Base.t(),
+          name: String.t()
+        }
 end

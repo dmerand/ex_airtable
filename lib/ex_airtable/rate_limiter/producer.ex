@@ -10,7 +10,7 @@ defmodule ExAirtable.RateLimiter.Producer do
   Track demand from a single BaseQueue GenStage producer
   """
   @type t :: %__MODULE__{
-    interval: integer(),
-    max_demand: integer()
-  }
+          interval: integer(),
+          max_demand: integer()
+        }
 end

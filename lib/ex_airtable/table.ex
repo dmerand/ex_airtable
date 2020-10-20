@@ -3,7 +3,7 @@ defmodule ExAirtable.Table do
   The `Table` behaviour allows you to define your own modules that use Airtables. It is a thin wrapper around `Service`, but often more convenient to use.
 
   ## Examples
-  
+
       defmodule MyTable do
         use ExAirtable.Table
 
@@ -37,21 +37,21 @@ defmodule ExAirtable.Table do
       Create a record in your Airtable. See `Service.create/2` for details.
       """
       def create(%Airtable.List{} = list) do
-        Service.create table(), list
+        Service.create(table(), list)
       end
 
       @doc """
       Delete a single record (by ID) from an Airtable
       """
       def delete(id) when is_binary(id) do
-        Service.delete table(), id
+        Service.delete(table(), id)
       end
 
       @doc """
       Get all records from your Airtable. See `Service.list/3` for details.
       """
       def list(opts \\ []) do
-        Service.list table(), opts
+        Service.list(table(), opts)
       end
 
       # Make overrideable for testing mocks
@@ -61,14 +61,14 @@ defmodule ExAirtable.Table do
       Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. Typically called automatically by a TableSynchronizer
       """
       def list_async(opts \\ []) do
-        Service.list_async table(), opts
+        Service.list_async(table(), opts)
       end
 
       @doc """
       Get a single record from your Airtable, matching by ID. See `Service.retrieve/2` for details.
       """
       def retrieve(id) when is_binary(id) do
-        Service.retrieve table(), id
+        Service.retrieve(table(), id)
       end
 
       # Make overrideable for testing mocks
@@ -85,7 +85,7 @@ defmodule ExAirtable.Table do
       Update a record in your Airtable. See `Service.update` for details.
       """
       def update(%Airtable.List{} = list, opts \\ []) do
-        Service.update table(), list, opts
+        Service.update(table(), list, opts)
       end
     end
   end

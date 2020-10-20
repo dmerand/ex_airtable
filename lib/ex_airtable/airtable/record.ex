@@ -10,10 +10,10 @@ defmodule ExAirtable.Airtable.Record do
             createdTime: nil
 
   @type t :: %__MODULE__{
-    id: String.t(),
-    fields: %{},
-    createdTime: String.t()
-  }
+          id: String.t(),
+          fields: %{},
+          createdTime: String.t()
+        }
 
   @doc """
   Convert a typical Airtable JSON response into a %Record{}
@@ -25,6 +25,7 @@ defmodule ExAirtable.Airtable.Record do
       createdTime: Map.get(map, "createdTime")
     }
   end
+
   def from_map(other), do: other
 
   @doc """

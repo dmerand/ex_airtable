@@ -16,24 +16,26 @@ defmodule ExAirtable.Supervisor do
   """
   @impl true
   def init(table_modules) do
-    table_caches = Enum.map(table_modules, fn module ->
-      {TableCache, table_module: module}
-    end)
+    table_caches =
+      Enum.map(table_modules, fn module ->
+        {TableCache, table_module: module}
+      end)
 
-    base_queues = Enum.reduce(table_modules, %{}, fn module, acc ->
-      base = apply(module, :base, [])
-      modules = Map.get(acc, base, [])
-      Map.put(acc, base, [module | modules])
-    end)
-    |> Map.values
-    |> Enum.map(fn table_modules -> 
-      {BaseQueue, table_modules} 
-    end)
+    base_queues =
+      Enum.reduce(table_modules, %{}, fn module, acc ->
+        base = apply(module, :base, [])
+        modules = Map.get(acc, base, [])
+        Map.put(acc, base, [module | modules])
+      end)
+      |> Map.values()
+      |> Enum.map(fn table_modules ->
+        {BaseQueue, table_modules}
+      end)
 
-    children = 
-      table_caches ++ 
-      base_queues ++ 
-      [{RateLimiter, table_modules}]
+    children =
+      table_caches ++
+        base_queues ++
+        [{RateLimiter, table_modules}]
 
     Supervisor.init(children, strategy: :one_for_one)
   end

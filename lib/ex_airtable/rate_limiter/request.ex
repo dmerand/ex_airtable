@@ -1,23 +1,23 @@
 defmodule ExAirtable.RateLimiter.Request do
   @moduledoc """
   The RateLimiter takes a `%Request{}`, runs its `:job` and (optionally) sends the results to the `:callback` function as arguments. 
-  
+
   Any arguments defined in the `:callback` `%Job{}` will be prepended to the function arguments, with the results of `:job` being the final argument passed.
   """
 
   alias ExAirtable.RateLimiter.Job
 
-  defstruct job: nil, 
+  defstruct job: nil,
             callback: nil
 
   @typedoc """
   A request to an `ExAirtable.RateLimiter`.
   """
   @type t :: %__MODULE__{
-    job: Job.t(),
-    callback: Job.t(),
-  }
-  
+          job: Job.t(),
+          callback: Job.t()
+        }
+
   @doc """
   Create a request
   """
@@ -26,10 +26,18 @@ defmodule ExAirtable.RateLimiter.Request do
       job: %Job{module: module, function: function, arguments: arguments}
     }
   end
-  def create({module, function, arguments}, {callback_module, callback_function, callback_arguments}) do
+
+  def create(
+        {module, function, arguments},
+        {callback_module, callback_function, callback_arguments}
+      ) do
     %__MODULE__{
       job: %Job{module: module, function: function, arguments: arguments},
-      callback: %Job{module: callback_module, function: callback_function, arguments: callback_arguments}
+      callback: %Job{
+        module: callback_module,
+        function: callback_function,
+        arguments: callback_arguments
+      }
     }
   end
 
@@ -40,6 +48,7 @@ defmodule ExAirtable.RateLimiter.Request do
   """
   def run(%__MODULE__{} = request) do
     result = Job.run(request.job)
+
     if request.callback do
       arguments = request.callback.arguments ++ [result]
       apply(request.callback.module, request.callback.function, arguments)

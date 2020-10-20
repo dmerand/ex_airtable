@@ -6,10 +6,11 @@ defmodule ExAirtable.Example.EnvTable do
   alias ExAirtable.Config
 
   @impl ExAirtable.Table
-  def base, do: %Config.Base{
-    id: System.get_env("BASE_ID"),
-    api_key: System.get_env("API_KEY")
-  }
+  def base,
+    do: %Config.Base{
+      id: System.get_env("BASE_ID"),
+      api_key: System.get_env("API_KEY")
+    }
 
   @impl ExAirtable.Table
   def name, do: System.get_env("TABLE_NAME")

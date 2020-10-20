@@ -10,10 +10,9 @@ defmodule ExAirtable.Airtable.List do
   defstruct records: [], offset: nil
 
   @type t :: %__MODULE__{
-    records: [Record.t()],
-    offset: String.t()
-  }
-
+          records: [Record.t()],
+          offset: String.t()
+        }
 
   @doc """
   Convert a typical Airtable JSON response into a %List{}. Any weird response will return an empty list.
@@ -24,6 +23,7 @@ defmodule ExAirtable.Airtable.List do
       offset: Map.get(map, "offset")
     }
   end
+
   def from_map(_other), do: %__MODULE__{}
 
   @doc """
@@ -32,14 +32,14 @@ defmodule ExAirtable.Airtable.List do
   Returns an array of `%Record{}` structs.
   """
   def filter_records(%__MODULE__{} = list, fun) do
-    Enum.filter list.records, fun
+    Enum.filter(list.records, fun)
   end
 
   @doc """
   Given a list, a field name that corresponds to an Airtable "relationship" field, and a record ID (presumably from the related table), find all records in the list that are related on that field.
 
   ## Examples
-  
+
       iex> filter_relations(list, "Users", "rec1234")
       [%Record{fields: %{"Users" => ["rec1234", "rec456"]}}, ...]
 
@@ -49,8 +49,7 @@ defmodule ExAirtable.Airtable.List do
   def filter_relations(%__MODULE__{} = list, field, id) do
     Enum.filter(list.records, fn record ->
       Record.get(record, field, [])
-      |> Enum.any?(& &1 == id)
+      |> Enum.any?(&(&1 == id))
     end)
-
   end
 end

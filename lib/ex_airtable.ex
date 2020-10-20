@@ -115,17 +115,20 @@ defmodule ExAirtable do
   Create one or more records in your Airtable from an %Airtable.List{} request. If your list includes more than 10 records, the request will be split so as not to be rejected by the Airtable API.
 
   This call is asynchronous, but the local cache will be automatically updated with any new records when the callback is successful.
-  
+
   See `Service.create/2` for more details.
   """
   def create(table_module, %Airtable.List{} = list) do
     Enum.chunk_every(list.records, 10)
     |> Enum.each(fn records ->
       smaller_list = %{list | records: records}
-      job = Request.create(
-        {table_module, :create, [smaller_list]}, 
-        {TableCache, :set_all, [table_module]}
-      )
+
+      job =
+        Request.create(
+          {table_module, :create, [smaller_list]},
+          {TableCache, :set_all, [table_module]}
+        )
+
       BaseQueue.request(table_module, job)
     end)
   end
@@ -136,52 +139,54 @@ defmodule ExAirtable do
   This call is asynchronous, but the local cache will be automatically updated when the callback is successful.
   """
   def delete(table_module, id) when is_binary(id) do
-    job = Request.create(
-      {table_module, :delete, [id]}, 
-      {TableCache, :delete, [table_module]}
-    )
+    job =
+      Request.create(
+        {table_module, :delete, [id]},
+        {TableCache, :delete, [table_module]}
+      )
+
     BaseQueue.request(table_module, job)
   end
-	
+
   @doc """
   Get all records from the given table module's cache
 
   ## Examples
-  
+
       iex> list(EnvTable)
       {:ok, %Airtable.List{}}
   """
-	def list(table_module) do
+  def list(table_module) do
     TableCache.list(table_module)
-	end
+  end
 
   @doc """
   Same as `list/0`, but raises on error.
   """
-	def list!(table_module) do
+  def list!(table_module) do
     {:ok, list} = TableCache.list(table_module)
     list
-	end
+  end
 
   @doc """
   Retrieve a single record from the table module's cache.
 
   ## Examples
-  
+
       iex> retrieve(EnvTable, "recLIY1WLOs8ocOAq")
       {:ok, %Airtable.Record{}}
   """
-	def retrieve(table_module, key) when is_binary(key) do
+  def retrieve(table_module, key) when is_binary(key) do
     TableCache.retrieve(table_module, key)
-	end
+  end
 
   @doc """
   Same as `retrieve/1`, but raises on error.
   """
-	def retrieve!(table_module, key) when is_binary(key) do
+  def retrieve!(table_module, key) when is_binary(key) do
     {:ok, record} = TableCache.retrieve(table_module, key)
     record
-	end
+  end
 
   @doc """
   Update a record in your Airtable. 
@@ -193,10 +198,12 @@ defmodule ExAirtable do
   See `Service.create/2` for more details about options that can be passed.
   """
   def update(table_module, %Airtable.List{} = list, opts \\ []) do
-    job = Request.create(
-      {table_module, :update, [list, opts]}, 
-      {TableCache, :update, [table_module]}
-    )
+    job =
+      Request.create(
+        {table_module, :update, [list, opts]},
+        {TableCache, :update, [table_module]}
+      )
+
     BaseQueue.request(table_module, job)
   end
 end

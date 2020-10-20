@@ -28,7 +28,7 @@ defmodule ExAirtable.Service do
 
   @doc """
   Create a record in Airtable. Pass in a valid `%Airtable.List{}` struct. 
-  
+
   Returns an `%Airtable.List{}` on success.
 
   ## Example
@@ -94,7 +94,7 @@ defmodule ExAirtable.Service do
   """
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do
     perform_request(table, url_suffix: "/" <> id)
-    |> Airtable.Record.from_map
+    |> Airtable.Record.from_map()
   end
 
   @doc """
@@ -106,10 +106,11 @@ defmodule ExAirtable.Service do
   - `overwrite` - Will overwrite all values in the destination record with values being sent. Default is false, which will only update fields that have values (ie aren't null).
   """
   def update(%Config.Table{} = table, %Airtable.List{} = list, opts \\ []) do
-    method = case Keyword.fetch(opts, :overwrite) do
-      true -> :put
-      _ -> :patch
-    end
+    method =
+      case Keyword.fetch(opts, :overwrite) do
+        true -> :put
+        _ -> :patch
+      end
 
     body =
       list
@@ -120,31 +121,40 @@ defmodule ExAirtable.Service do
     |> Airtable.List.from_map()
   end
 
-  defp push_to_paginated_list(%Airtable.List{offset: offset} = list, %Config.Table{} = table, opts) when is_binary(offset) do
+  defp push_to_paginated_list(
+         %Airtable.List{offset: offset} = list,
+         %Config.Table{} = table,
+         opts
+       )
+       when is_binary(offset) do
     params = Keyword.get(opts, :params, %{}) |> Map.put(:offset, offset)
     opts = Keyword.put(opts, :params, params)
     new_list = list(table, opts)
-    
+
     case new_list do
       %Airtable.List{} ->
-        new_records = [list.records | new_list.records] |> List.flatten
+        new_records = [list.records | new_list.records] |> List.flatten()
         %{list | records: new_records}
+
       _anything_else ->
         new_list
     end
   end
+
   defp push_to_paginated_list(list, _table, _opts), do: list
 
   defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
-    table.base.endpoint_url <> "/" <> 
-      URI.encode(table.base.id) <> "/" <> 
-      URI.encode(table.name) <> 
+    table.base.endpoint_url <>
+      "/" <>
+      URI.encode(table.base.id) <>
+      "/" <>
+      URI.encode(table.name) <>
       URI.encode(suffix)
   end
 
   defp default_headers(%Config.Table{} = table) do
     %{
-      "Authorization": "Bearer #{table.base.api_key}",
+      Authorization: "Bearer #{table.base.api_key}",
       "Content-Type": "application/json"
     }
   end
@@ -161,12 +171,15 @@ defmodule ExAirtable.Service do
     case request(request_data) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         body
-        |> Jason.decode!
+        |> Jason.decode!()
+
       {:ok, %HTTPoison.Response{status_code: 429}} ->
         Process.sleep(:timer.seconds(30))
         perform_request(table, opts)
+
       {:ok, %HTTPoison.Response{} = response} ->
         {:error, response}
+
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end
@@ -176,12 +189,14 @@ defmodule ExAirtable.Service do
     # Airtable really doesn't like createdTime being in any pushes.
     fields = [:createdTime] ++ fields
 
-    %{list | records: Enum.map(list.records, fn record ->
-      Enum.reduce(fields, Map.from_struct(record), fn field, acc ->
-        %{Map.delete(acc, field) | fields:
-          Map.delete(acc.fields, field)
-        }
-      end)
-    end)}
+    %{
+      list
+      | records:
+          Enum.map(list.records, fn record ->
+            Enum.reduce(fields, Map.from_struct(record), fn field, acc ->
+              %{Map.delete(acc, field) | fields: Map.delete(acc.fields, field)}
+            end)
+          end)
+    }
   end
 end

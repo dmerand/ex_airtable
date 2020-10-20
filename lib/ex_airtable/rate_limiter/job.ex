@@ -5,7 +5,7 @@ defmodule ExAirtable.RateLimiter.Job do
   "Job" = Module, Function, Arguments
   """
 
-  defstruct module: nil, 
+  defstruct module: nil,
             function: nil,
             arguments: []
 
@@ -15,10 +15,10 @@ defmodule ExAirtable.RateLimiter.Job do
   This is not to be confused with the [mfa() type](https://hexdocs.pm/elixir/typespecs.html#built-in-types), which is a "module, function, arity" triplet. In this case we need to pass the actual arguments, and we'll let the system take care of pattern-matching for arity.
   """
   @type t :: %__MODULE__{
-    module: module(),
-    function: function(),
-    arguments: [term()]
-  }
+          module: module(),
+          function: function(),
+          arguments: [term()]
+        }
 
   @doc """
   Run a given `%Job{}`.

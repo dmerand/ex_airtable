@@ -49,6 +49,7 @@ defmodule ExAirtable.RateLimiter do
         GenStage.ask(from, producer.max_demand)
         Process.send_after(self(), {:ask, from}, producer.interval)
         producers
+
       %{} ->
         producers
     end
