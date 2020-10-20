@@ -33,7 +33,8 @@ defmodule ExAirtable.MixProject do
     [
       {:gen_stage, "~> 1.0"},
       {:httpoison, "~> 1.6"},
-      {:jason, "~> 1.2"}
+      {:jason, "~> 1.2"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
