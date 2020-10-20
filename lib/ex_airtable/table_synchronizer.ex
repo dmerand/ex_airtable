@@ -26,7 +26,7 @@ defmodule ExAirtable.TableSynchronizer do
       table_module: Keyword.fetch!(opts, :table_module)
     }
 
-    send(self(), :sync)
+    Process.send_after(self(), :sync, 500)
 
     {:ok, state}
   end
