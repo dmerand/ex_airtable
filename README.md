@@ -6,7 +6,7 @@ The preferred mode of operation is to run in rate-limited and cached mode, to en
 
 If you wish to skip rate-limiting and caching, you can simply hit the Airtable API directly and get nicely-wrapped results by using the `Table` endpoints directly (see below for setup).
 
-In either the direct-to-API or cached-and-rate-limited case, this library provides an `%Airtable.Record{}` and `%Airtable.List{}` struct which mirror the API results that Airtable provides. All results will be wrapped in those structs. We (currently) make no effort to convert Airtable's generic data representation into an app's local data domain, but instead provide a sane default that can be easily extended (via Ecto schemas for example).
+In either the direct-to-API or cached-and-rate-limited case, this library provides an `%Airtable.Record{}` and `%Airtable.List{}` struct which mirror the API results that Airtable provides. All results will be wrapped in those structs. We (currently) make no effort to convert Airtable's generic data representation into an app's local data domain, but instead provide a sane default that can be easily extended (via Ecto schemas for example). We also provide some convenience methods for things like record field retrieval and relationship matching (see below).
 
 ## Setup
 
