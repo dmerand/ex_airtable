@@ -1,7 +1,7 @@
 defmodule ExAirtable.RateLimiter.Producer do
   @moduledoc """
   Defines a struct for managing RateLimiter state. 
-  
+
   A Ratelimiter contains a map of `%ExAirtable.RateLimiter.Producer{}`s.
   """
 

@@ -114,7 +114,7 @@ defmodule ExAirtable do
 
   @doc """
   Create one or more records in your Airtable from an %Airtable.List{} request. 
-  
+
   If your list includes more than 10 records, the request will be split so as not to be rejected by the Airtable API.
 
   This call is asynchronous, but the local cache will be automatically updated with any new records when the callback is successful.
@@ -138,7 +138,7 @@ defmodule ExAirtable do
 
   @doc """
   Delete a single record (by ID) from an Airtable. 
-  
+
   If successful, the record will be deleted from the cache as well.
 
   This call is asynchronous, but the local cache will be automatically updated when the callback is successful.

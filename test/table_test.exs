@@ -43,12 +43,17 @@ defmodule ExAirtable.TableTest do
 
   @tag :external_mutation
   test "create" do
-    list = %Airtable.List{records: [
-      %Airtable.Record{fields: %{
-        "Name" => "Test Name",
-        "Description" => "Test Description"
-      }}
-    ]}
+    list = %Airtable.List{
+      records: [
+        %Airtable.Record{
+          fields: %{
+            "Name" => "Test Name",
+            "Description" => "Test Description"
+          }
+        }
+      ]
+    }
+
     assert %Airtable.List{} = EnvTable.create(list)
   end
 end

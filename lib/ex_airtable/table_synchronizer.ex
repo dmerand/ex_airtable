@@ -1,7 +1,7 @@
 defmodule ExAirtable.TableSynchronizer do
   @moduledoc """
   Run scheduled synchronization of an `ExAirtable.TableCache` against the relevant Airtable base. 
-  
+
   This will be automatically spawned and linked to an `ExAirtable.TableCache` when `start_link/2` is run for that cache.  
   """
 

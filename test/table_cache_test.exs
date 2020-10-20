@@ -19,25 +19,29 @@ defmodule ExAirtable.TableCacheTest do
 
   test "set + retrieve by ID" do
     TableCache.set(@table_module, "cool", "beans")
-    Process.sleep(20) # Give it a moment, since it's a cast
+    # Give it a moment, since it's a cast
+    Process.sleep(20)
     assert {:ok, "beans"} = TableCache.retrieve(@table_module, "cool")
   end
 
   test "multiple Tablecache servers don't overlap" do
-    TableCache.start_link(table_module: EnvTable, skip_sync: true) 
+    TableCache.start_link(table_module: EnvTable, skip_sync: true)
 
     TableCache.set(@table_module, "new", "item")
     TableCache.set(EnvTable, "new", "other_item")
-    Process.sleep(20) 
+    Process.sleep(20)
     assert {:ok, "item"} = TableCache.retrieve(@table_module, "new")
     assert {:ok, "other_item"} = TableCache.retrieve(EnvTable, "new")
   end
 
   test "set_all + list" do
-    list = %List{records: [
-      %Record{id: "1", fields: %{cool: "beans"}},
-      %Record{id: "2", fields: %{neato: "mosquito"}},
-    ]}
+    list = %List{
+      records: [
+        %Record{id: "1", fields: %{cool: "beans"}},
+        %Record{id: "2", fields: %{neato: "mosquito"}}
+      ]
+    }
+
     TableCache.set_all(@table_module, list)
     Process.sleep(20)
     assert {:ok, %List{} = list} = TableCache.list(@table_module)
@@ -45,10 +49,10 @@ defmodule ExAirtable.TableCacheTest do
 
   test "delete by ID" do
     TableCache.set(@table_module, "cool", "beans")
-    Process.sleep(20) 
+    Process.sleep(20)
     assert {:ok, "beans"} = TableCache.retrieve(@table_module, "cool")
     TableCache.delete(@table_module, %{"id" => "cool"})
-    Process.sleep(100) 
+    Process.sleep(100)
     assert {:error, :not_found} = TableCache.retrieve(@table_module, "cool")
   end
 
@@ -58,14 +62,16 @@ defmodule ExAirtable.TableCacheTest do
     updated_record = %{record | fields: %{update_existing: true}}
 
     TableCache.update(@table_module, %List{records: [updated_record]})
-    Process.sleep(20) # Give it a moment, since it's a cast
+    # Give it a moment, since it's a cast
+    Process.sleep(20)
     assert {:ok, ^updated_record} = TableCache.retrieve(@table_module, record.id)
   end
 
   test "upsert" do
     record = %Record{id: "1", fields: %{upsert: true}}
     TableCache.update(@table_module, %List{records: [record]})
-    Process.sleep(20) # Give it a moment, since it's a cast
+    # Give it a moment, since it's a cast
+    Process.sleep(20)
     assert {:ok, ^record} = TableCache.retrieve(@table_module, record.id)
   end
 end

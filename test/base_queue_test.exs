@@ -13,7 +13,7 @@ defmodule ExAirtable.BaseQueueTest do
   end
 
   test "ID generation" do
-    id = :"BaseQueue-Mock ID" 
+    id = :"BaseQueue-Mock ID"
     assert ^id = BaseQueue.id(@table_module)
   end
 
@@ -22,21 +22,23 @@ defmodule ExAirtable.BaseQueueTest do
   end
 
   test "Request buffer", %{pid: pid} do
-    request = Request.create(
-      {String, :to_atom, ["has_callback"]}, 
-      {Kernel, :send, [self()]}
-    )
-    BaseQueue.request(@table_module, request)
-		# Sleeping because it's a cast.
-    Process.sleep(10)
-    gen_stage = :sys.get_state(pid)
-		assert MapSet.member?(gen_stage.state.requests, request)
-		assert 1 = Enum.count(gen_stage.state.requests)
+    request =
+      Request.create(
+        {String, :to_atom, ["has_callback"]},
+        {Kernel, :send, [self()]}
+      )
 
-		# Test duplicate
+    BaseQueue.request(@table_module, request)
+    # Sleeping because it's a cast.
+    Process.sleep(10)
+    gen_stage = :sys.get_state(pid)
+    assert MapSet.member?(gen_stage.state.requests, request)
+    assert 1 = Enum.count(gen_stage.state.requests)
+
+    # Test duplicate
     BaseQueue.request(@table_module, request)
     Process.sleep(10)
     gen_stage = :sys.get_state(pid)
-		assert 1 = Enum.count(gen_stage.state.requests)
+    assert 1 = Enum.count(gen_stage.state.requests)
   end
 end

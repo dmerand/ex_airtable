@@ -1,7 +1,7 @@
 defmodule ExAirtable.TableCache do
   @moduledoc """
   A caching server for an `ExAirtable.Table`. 
-  
+
   Given a module name that implements the `Table` behaviour, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
 
   ## Examples
@@ -34,7 +34,7 @@ defmodule ExAirtable.TableCache do
 
   @doc """
   Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID. 
-  
+
   This is an asynchronous operation.
   """
   def delete(table_module, %{"id" => id}) do
@@ -43,7 +43,7 @@ defmodule ExAirtable.TableCache do
 
   @doc """
   Clear all records from the given GenServer. 
-  
+
   This is a synchronous operation.
   """
   def delete_all(table_module) do
@@ -112,6 +112,7 @@ defmodule ExAirtable.TableCache do
       %{delete_on_refresh: true} ->
         delete_all(table_module)
         set_all(table_module, new_list)
+
       _ ->
         set_all(table_module, new_list)
         delete(table_module, %{"id" => "paginated_list"})
@@ -166,7 +167,7 @@ defmodule ExAirtable.TableCache do
   #
   # GENSERVER 
   #
-  
+
   @impl GenServer
   def handle_call(:delete_all, _from, %{table_module: table_module} = state) do
     :ets.delete_all_objects(table_for(table_module))
@@ -228,7 +229,7 @@ defmodule ExAirtable.TableCache do
   @impl GenServer
   @doc """
   Initialize the caching server.
-  
+
   This is not meant to be called manually, but will be handle when `start_link/1` is called.
 
   See `start_link/1` for options.

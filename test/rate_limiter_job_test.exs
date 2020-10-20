@@ -8,15 +8,17 @@ defmodule ExAirtable.RateLimiter.JobTest do
   end
 
   test "request without callback" do
-    request = Request.create {String, :to_atom, ["no_callback"]}
+    request = Request.create({String, :to_atom, ["no_callback"]})
     assert :no_callback = Request.run(request)
   end
 
   test "request with callback" do
-    request = Request.create(
-      {String, :to_atom, ["has_callback"]}, 
-      {Kernel, :send, [self()]}
-    )
+    request =
+      Request.create(
+        {String, :to_atom, ["has_callback"]},
+        {Kernel, :send, [self()]}
+      )
+
     Request.run(request)
     assert_receive :has_callback
   end

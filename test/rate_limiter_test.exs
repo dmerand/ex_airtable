@@ -18,10 +18,11 @@ defmodule ExAirtable.RateLimiterTest do
   end
 
   test "requests flow to rate limiter on sync_subscribe", %{base_queue: base_queue} do
-    request = Request.create(
-      {String, :to_atom, ["requests_flow"]}, 
-      {Kernel, :send, [self()]}
-    )
+    request =
+      Request.create(
+        {String, :to_atom, ["requests_flow"]},
+        {Kernel, :send, [self()]}
+      )
 
     BaseQueue.request(@table_module, request)
     assert MapSet.member?(:sys.get_state(base_queue).state.requests, request)
@@ -32,24 +33,27 @@ defmodule ExAirtable.RateLimiterTest do
   end
 
   test "automatic subscription via passed table modules" do
-    request = Request.create(
-      {String, :to_atom, ["auto_subscription"]}, 
-      {Kernel, :send, [self()]}
-    )
+    request =
+      Request.create(
+        {String, :to_atom, ["auto_subscription"]},
+        {Kernel, :send, [self()]}
+      )
 
     BaseQueue.request(@table_module, request)
     GenStage.start_link(RateLimiter, [@table_module])
     assert_receive :auto_subscription, 100
   end
 
-
-  @tag :external_api # because it's slow, and *technically* external :/
+  # because it's slow, and *technically* external :/
+  @tag :external_api
   test "only pulls 5 requests per wave", %{base_queue: base_queue} do
     Enum.each(1..15, fn i ->
-      request = Request.create(
-        {String, :to_atom, ["request_#{i}"]}, 
-        {Kernel, :send, [self()]}
-      )
+      request =
+        Request.create(
+          {String, :to_atom, ["request_#{i}"]},
+          {Kernel, :send, [self()]}
+        )
+
       BaseQueue.request(@table_module, request)
     end)
 
