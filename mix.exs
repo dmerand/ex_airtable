@@ -10,6 +10,7 @@ defmodule ExAirtable.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package(),
       source_url: "https://github.com/exploration/ex_airtable"
     ]
   end
@@ -33,6 +34,13 @@ defmodule ExAirtable.MixProject do
       {:gen_stage, "~> 1.0"},
       {:httpoison, "~> 1.6"},
       {:jason, "~> 1.2"}
+    ]
+  end
+
+  defp package do
+		[
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/exploration/ex_airtable"}
     ]
   end
 end

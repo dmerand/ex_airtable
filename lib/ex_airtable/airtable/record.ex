@@ -1,6 +1,8 @@
 defmodule ExAirtable.Airtable.Record do
   @moduledoc """
-  Struct for an Airtable Record. This should directly match the results returned from any Airtable REST API endpoint that returns records.
+  Struct for an Airtable Record. 
+
+  This should directly match the results returned from any Airtable REST API endpoint that returns records.
   """
 
   @derive {Jason.Encoder, except: [:createdTime]}
@@ -29,7 +31,9 @@ defmodule ExAirtable.Airtable.Record do
   def from_map(other), do: other
 
   @doc """
-  Retrieve a field from within a record's fields. Returns `nil` by default if no field matches.
+  Retrieve a field from within a record's fields
+
+  Returns `nil` by default if no field matches.
   """
   def get(%__MODULE__{} = record, field, default \\ nil) do
     Map.get(record.fields, field, default)

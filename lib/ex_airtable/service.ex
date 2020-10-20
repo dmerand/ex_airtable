@@ -1,6 +1,8 @@
 defmodule ExAirtable.Service do
   @moduledoc """
-  The `Service` is where we directly hit the Airtable API. Most methods take an `Airtable.Config.Table{}`, along with parameters to be forwarded to the REST API.
+  The `Service` defines methods to directly hit the Airtable API. 
+  
+  Most methods take an `Airtable.Config.Table{}`, along with parameters to be forwarded to the REST API.
 
   These methods can be called directly, provided you have a valid `%ExAirtable.Config.Table{}` configuration. Alternatively, you can define a module that "inherits" this behavior - see `ExAirtable.Table` for more details.
 
@@ -27,9 +29,9 @@ defmodule ExAirtable.Service do
   alias ExAirtable.{Airtable, Config}
 
   @doc """
-  Create a record in Airtable. Pass in a valid `%Airtable.List{}` struct. 
+  Create a record in Airtable. Pass in a valid `%ExAirtable.Airtable.List{}` struct. 
 
-  Returns an `%Airtable.List{}` on success.
+  Returns an `%ExAirtable.Airtable.List{}` on success.
 
   ## Example
 
@@ -64,12 +66,13 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  List all records. Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
+  List all records in a table.
+  
+  Returns an `%Airtable.List{}` on success, and an `{:error, reason}` tuple on failure.
 
   Valid options are:
 
     - `params` - any parameters you wish to send along to the Airtable API (for example `view: "My View"` or `sort: "My Field"`. See `https://airtable.com/YOURBASEID/api/docs` for details (in the "List Records" sections).
-
 
   ## Examples
       iex> list(table, params: %{view: "My View Name"})
@@ -82,7 +85,9 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests. This is typically utilized by cache processes rather than called by hand - although it could be used by hand if you only want one page of results.
+  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests. 
+  
+  This is typically utilized by cache processes rather than called by hand - although it could be used by hand if you only want one page of results.
   """
   def list_async(%Config.Table{} = table, opts \\ []) do
     perform_request(table, opts)
@@ -90,7 +95,9 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Get a single record, matching by ID. Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
+  Retrieve a single record, matching by ID. 
+  
+  Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do
     perform_request(table, url_suffix: "/" <> id)

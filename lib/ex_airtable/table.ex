@@ -1,6 +1,8 @@
 defmodule ExAirtable.Table do
   @moduledoc """
-  The `Table` behaviour allows you to define your own modules that use Airtables. It is a thin wrapper around `Service`, but often more convenient to use.
+  The `Table` behaviour allows you to define your own modules that use Airtables. 
+  
+  It is a thin wrapper around `Service`, but often more convenient to use.
 
   ## Examples
 
@@ -58,14 +60,18 @@ defmodule ExAirtable.Table do
       defoverridable list: 1
 
       @doc """
-      Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. Typically called automatically by a TableSynchronizer
+      Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. 
+      
+      Typically called automatically by a TableSynchronizer
       """
       def list_async(opts \\ []) do
         Service.list_async(table(), opts)
       end
 
       @doc """
-      Get a single record from your Airtable, matching by ID. See `Service.retrieve/2` for details.
+      Get a single record from your Airtable, matching by ID. 
+      
+      See `Service.retrieve/2` for details.
       """
       def retrieve(id) when is_binary(id) do
         Service.retrieve(table(), id)

@@ -1,6 +1,8 @@
 defmodule ExAirtable.TableCache do
   @moduledoc """
-  A caching server for an `ExAirtable.Table`. Given a module name that implements the `Table` behaviour, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
+  A caching server for an `ExAirtable.Table`. 
+  
+  Given a module name that implements the `Table` behaviour, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
 
   ## Examples
       
@@ -31,14 +33,18 @@ defmodule ExAirtable.TableCache do
   #
 
   @doc """
-  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID. This is an asynchronous operation.
+  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID. 
+  
+  This is an asynchronous operation.
   """
   def delete(table_module, %{"id" => id}) do
     GenServer.cast(table_module, {:delete, id})
   end
 
   @doc """
-  Clear all records from the given GenServer. This is a synchronous operation.
+  Clear all records from the given GenServer. 
+  
+  This is a synchronous operation.
   """
   def delete_all(table_module) do
     GenServer.call(table_module, :delete_all)
@@ -136,7 +142,7 @@ defmodule ExAirtable.TableCache do
   end
 
   @doc """
-  Replace an entire cache with a new set of `%Airtable.Record{}`s.
+  Replace an entire cache with a new set of `%ExAirtable.Airtable.Record{}`s.
   """
   def set_all(table_module, %Airtable.List{} = list) do
     GenServer.cast(table_module, {:set_all, list})
@@ -151,7 +157,7 @@ defmodule ExAirtable.TableCache do
   end
 
   @doc """
-  Given an `ExAirtable.Table` module and an `Airtable.Record{}` struct, update the matching record in the cache, and insert it if it doesn't exist.
+  Given an `ExAirtable.Table` module and an `ExAirtable.Airtable.Record{}` struct, update the matching record in the cache, and insert it if it doesn't exist.
   """
   def update(table_module, %Airtable.List{} = list) do
     GenServer.cast(table_module, {:update, list})
@@ -221,7 +227,9 @@ defmodule ExAirtable.TableCache do
 
   @impl GenServer
   @doc """
-  Initialize the caching server. This is not meant to be called manually, but will be handle when `start_link/1` is called.
+  Initialize the caching server.
+  
+  This is not meant to be called manually, but will be handle when `start_link/1` is called.
 
   See `start_link/1` for options.
   """

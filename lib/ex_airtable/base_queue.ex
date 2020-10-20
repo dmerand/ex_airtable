@@ -1,6 +1,8 @@
 defmodule ExAirtable.BaseQueue do
   @moduledoc """
-  The purpose of the BaseQueue is to serve as a GenStage "Producer" for the RateLimiter. Requests that are meant to go to Airtable are sent to the appropriate BaseQueue (one per base, shared among all Tables), and put in line for the RateLimiter to execute as it's able.
+  The purpose of the BaseQueue is to serve as a GenStage "Producer" for the RateLimiter. 
+  
+  Requests that are meant to go to Airtable are sent to the appropriate BaseQueue (one per base, shared among all Tables), and put in line for the RateLimiter to execute as it's able.
 
   Note that the request buffer is a MapSet - meaning that duplicate requests will be ignored.
   """

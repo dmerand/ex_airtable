@@ -1,6 +1,8 @@
 defmodule ExAirtable.RateLimiter.Producer do
   @moduledoc """
-  This module defines a struct for managing RateLimiter state. A Ratelimiter contains a map of `%Producer{}`s.
+  Defines a struct for managing RateLimiter state. 
+  
+  A Ratelimiter contains a map of `%ExAirtable.RateLimiter.Producer{}`s.
   """
 
   defstruct interval: :timer.seconds(1),

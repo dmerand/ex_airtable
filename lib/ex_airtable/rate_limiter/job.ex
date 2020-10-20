@@ -1,6 +1,6 @@
 defmodule ExAirtable.RateLimiter.Job do
   @moduledoc """
-  This module defines a struct that is handy for passing data back and forth between functions, as data.
+  Defines a struct that is handy for passing data back and forth between functions, as data.
 
   "Job" = Module, Function, Arguments
   """

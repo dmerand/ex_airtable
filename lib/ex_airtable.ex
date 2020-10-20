@@ -1,6 +1,5 @@
 defmodule ExAirtable do
   @moduledoc """
-
   Provides an interface to query Airtable bases/tables, and an optional server to cache the results of a table into memory for faster access and to avoid Airtable API access limitations.
 
   The preferred mode of operation is to run in rate-limited and cached mode, to ensure that no API limitations are hit. The functions in the `ExAirtable` base module will operate through the rate-limiter and cache by default.
@@ -114,7 +113,9 @@ defmodule ExAirtable do
   alias ExAirtable.RateLimiter.Request
 
   @doc """
-  Create one or more records in your Airtable from an %Airtable.List{} request. If your list includes more than 10 records, the request will be split so as not to be rejected by the Airtable API.
+  Create one or more records in your Airtable from an %Airtable.List{} request. 
+  
+  If your list includes more than 10 records, the request will be split so as not to be rejected by the Airtable API.
 
   This call is asynchronous, but the local cache will be automatically updated with any new records when the callback is successful.
 
@@ -136,7 +137,9 @@ defmodule ExAirtable do
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable. If successful, the record will be deleted from the cache as well.
+  Delete a single record (by ID) from an Airtable. 
+  
+  If successful, the record will be deleted from the cache as well.
 
   This call is asynchronous, but the local cache will be automatically updated when the callback is successful.
   """

@@ -1,6 +1,8 @@
 defmodule ExAirtable.Example.EnvTable do
   @moduledoc """
-  This is useful for playing around in the console - it'll load up a table based on whatever you have in your config. Try `make console` to quickly load the defaults.
+  This is useful for playing around in the console.
+  
+  It'll load up a table based on whatever you have in your config. Try `make console` to quickly load the defaults.
   """
   use ExAirtable.Table
   alias ExAirtable.Config

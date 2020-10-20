@@ -1,6 +1,8 @@
 defmodule ExAirtable.Supervisor do
   @moduledoc """
-  This is the "master control" that takes care of rate-limiting and caching for all of your Tables. See the `ExAirtable` module and `start_link/2` for details about initialization.
+  This is the "master control" that takes care of rate-limiting and caching for all of your Tables. 
+  
+  See the `ExAirtable` module and `start_link/2` for details about initialization.
   """
 
   use Supervisor

@@ -8,7 +8,7 @@ defmodule ExAirtable.Config.Table do
   defstruct base: %Config.Base{}, name: nil
 
   @typedoc """
-  A configuration for an Airtable Table - a reference to a `%Base{}` and a name.
+  A configuration for an Airtable Table - a reference to an `%ExAirtable.Config.Base{}` and a name.
   """
   @type t :: %__MODULE__{
           base: Config.Base.t(),
