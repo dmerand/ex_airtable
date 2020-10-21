@@ -128,35 +128,13 @@ defmodule ExAirtable.Service do
     |> Airtable.List.from_map()
   end
 
-  defp push_to_paginated_list(
-         %Airtable.List{offset: offset} = list,
-         %Config.Table{} = table,
-         opts
-       )
-       when is_binary(offset) do
-    params = Keyword.get(opts, :params, %{}) |> Map.put(:offset, offset)
-    opts = Keyword.put(opts, :params, params)
-    new_list = list(table, opts)
-
-    case new_list do
-      %Airtable.List{} ->
-        new_records = [list.records | new_list.records] |> List.flatten()
-        %{list | records: new_records}
-
-      _anything_else ->
-        new_list
-    end
-  end
-
-  defp push_to_paginated_list(list, _table, _opts), do: list
-
   defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
     table.base.endpoint_url <>
       "/" <>
-      URI.encode_www_form(table.base.id) <>
+      encode(table.base.id) <>
       "/" <>
-      URI.encode_www_form(table.name) <>
-      URI.encode_www_form(suffix)
+      encode(table.name) <>
+      encode(suffix)
   end
 
   defp default_headers(%Config.Table{} = table) do
@@ -164,6 +142,11 @@ defmodule ExAirtable.Service do
       Authorization: "Bearer #{table.base.api_key}",
       "Content-Type": "application/json"
     }
+  end
+
+  defp encode(param) do
+    URI.encode_www_form(param)
+    |> String.replace("+", "%20")
   end
 
   defp perform_request(table, opts) when is_list(opts) do
@@ -191,6 +174,29 @@ defmodule ExAirtable.Service do
         {:error, reason}
     end
   end
+
+  defp push_to_paginated_list(
+         %Airtable.List{offset: offset} = list,
+         %Config.Table{} = table,
+         opts
+       )
+       when is_binary(offset) do
+    params = Keyword.get(opts, :params, %{}) |> Map.put(:offset, offset)
+    opts = Keyword.put(opts, :params, params)
+    new_list = list(table, opts)
+
+    case new_list do
+      %Airtable.List{} ->
+        new_records = [list.records | new_list.records] |> List.flatten()
+        %{list | records: new_records}
+
+      _anything_else ->
+        new_list
+    end
+  end
+
+  defp push_to_paginated_list(list, _table, _opts), do: list
+
 
   defp remove_objectionable_fields(%Airtable.List{} = list, fields \\ [:id]) do
     # Airtable really doesn't like createdTime being in any pushes.
