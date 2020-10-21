@@ -153,10 +153,10 @@ defmodule ExAirtable.Service do
   defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
     table.base.endpoint_url <>
       "/" <>
-      URI.encode(table.base.id) <>
+      URI.encode_www_form(table.base.id) <>
       "/" <>
-      URI.encode(table.name) <>
-      URI.encode(suffix)
+      URI.encode_www_form(table.name) <>
+      URI.encode_www_form(suffix)
   end
 
   defp default_headers(%Config.Table{} = table) do
