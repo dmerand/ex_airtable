@@ -2,6 +2,7 @@
 
 - 0.2.2
   - Fixed a bug that prevented starting a supervisor with multiple tables.
+  - Fixed a bug in URI encoding that prevented tables with crazy characters in their names (like "/") from being queried.
 - 0.2.1
   - Upgraded to Elixir 1.11.1, and fixed some bugs that came with that. Added ASDF `.tool-versions` to the repo to help with developers who want to pitch in.
 - 0.2.0
