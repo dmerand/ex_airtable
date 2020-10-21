@@ -16,7 +16,7 @@ defmodule ExAirtable.TableSynchronizer do
         }
 
   use GenServer
-  alias ExAirtable.{BaseQueue, TableCache}
+  alias ExAirtable.{RateLimiter, TableCache}
   alias ExAirtable.RateLimiter.Request
 
   @impl GenServer
@@ -43,7 +43,7 @@ defmodule ExAirtable.TableSynchronizer do
         {TableCache, :push_paginated_list, [table_module]}
       )
 
-    BaseQueue.request(state.table_module, job)
+    RateLimiter.request(state.table_module, job)
 
     schedule(state)
 

@@ -109,7 +109,7 @@ defmodule ExAirtable do
   See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information.
   """
 
-  alias ExAirtable.{Airtable, BaseQueue, TableCache}
+  alias ExAirtable.{Airtable, RateLimiter, TableCache}
   alias ExAirtable.RateLimiter.Request
 
   @doc """
@@ -132,7 +132,7 @@ defmodule ExAirtable do
           {TableCache, :set_all, [table_module]}
         )
 
-      BaseQueue.request(table_module, job)
+      RateLimiter.request(table_module, job)
     end)
   end
 
@@ -150,7 +150,7 @@ defmodule ExAirtable do
         {TableCache, :delete, [table_module]}
       )
 
-    BaseQueue.request(table_module, job)
+    RateLimiter.request(table_module, job)
   end
 
   @doc """
@@ -209,6 +209,6 @@ defmodule ExAirtable do
         {TableCache, :update, [table_module]}
       )
 
-    BaseQueue.request(table_module, job)
+    RateLimiter.request(table_module, job)
   end
 end

@@ -1,59 +1,108 @@
 defmodule ExAirtable.RateLimiter do
   @moduledoc """
-  The purpose of the RateLimiter is to serve as a GenStage "Consumer" for the BaseQueues. 
+  The RateLimiter ensures that no requests go to Airtable fast enough to trigger API rate-limiting.
 
-  Requests that are meant to go to Airtable are sent to the appropriate BaseQueue (one per base, shared among all Tables), and put in line for the RateLimiter to execute as it's able.
+  Requests will be handled immediately until more than 5 happen, at which point they go onto a queue which flushes every second. This ensures that no more than 5 requests per second will ever be sent to Airtable.
+
+  There is one `ExAirtable.RateLimiter.BaseQueue` per base to track requests, since Airtable does rate-limiting per-base.
   """
 
-  use GenStage
+  use GenServer
+  alias ExAirtable.RateLimiter.{BaseQueue, Request}
 
-  alias ExAirtable.BaseQueue
-  alias ExAirtable.RateLimiter.{Producer, Request}
+  @doc """
+  Add a request to the request buffer for a given table.
 
-  def handle_subscribe(:producer, _opts, from, producers) do
-    producers = Map.put(producers, from, %Producer{})
-    producers = ask_and_schedule(producers, from)
-
-    {:manual, producers}
+  Note that the request buffer is a MapSet - meaning that (exact) duplicate requests will be ignored.
+  """
+  def request(table_module, %Request{} = request) do
+    GenServer.cast(__MODULE__, {:add_request, table_module.base().id, request})
   end
 
-  def handle_cancel(_, from, producers) do
-    {:noreply, [], Map.delete(producers, from)}
+  @impl GenServer
+  @doc false
+  def handle_cast({:add_request, base_id, request}, base_queues) do
+    base_queue = Map.get(base_queues, base_id)
+
+    if can_be_synchronous(base_queue) do
+      Request.run(request)
+
+      updated_queues =
+        Map.put(base_queues, base_id, 
+          %{base_queue | in_progress: base_queue.in_progress + 1}
+        )
+
+      {:noreply, updated_queues}
+    else
+      updated_queues =
+        Map.put(base_queues, base_id, 
+          %{base_queue | requests: MapSet.put(base_queue.requests, request)}
+        )
+
+      {:noreply, updated_queues}
+    end
   end
 
-  def handle_events(events, _from, producers) do
-    Enum.each(events, &Request.run/1)
+  @impl GenServer
+  @doc false
+  def handle_info({:run_requests, base_id}, base_queues) do
+    base_queue = Map.get(base_queues, base_id)
 
-    {:noreply, [], producers}
+    {requests_to_run, remainder} =
+      base_queue
+      |> Map.get(:requests)
+      |> Enum.sort_by(& &1.created)
+      |> Enum.split(base_queue.max_demand - base_queue.in_progress)
+
+    Enum.map(requests_to_run, & Task.async(fn -> Request.run(&1) end))
+    |> Enum.each(&Task.await/1)
+
+    updated_queues =
+      Map.put(base_queues, base_id, %{base_queue | 
+        requests: MapSet.new(remainder),
+        in_progress: 0
+      })
+
+    schedule(updated_queues, base_id)
+
+    {:noreply, updated_queues}
   end
 
-  def handle_info({:ask, from}, producers) do
-    {:noreply, [], ask_and_schedule(producers, from)}
+  @impl GenServer
+  @doc false
+  def init(table_modules) do
+    base_queues =
+      Enum.reduce(table_modules, %{}, fn table_module, acc ->
+        Map.put(acc, table_module.base().id, %BaseQueue{})
+      end)
+
+    base_queues
+    |> Map.keys()
+    |> Enum.each(&schedule(base_queues, &1))
+
+    {:ok, base_queues}
   end
 
   @doc """
   Pass a list of valid module names where the given modules have implemented the `ExAirtable.Table` behaviour.
 
-  Internal state is a map of `%Producer{}` structs where the key is the module name of the producer.
+  Internal state is a map of `%BaseQueue{}` structs where the key is the base ID.
   """
-  def init(table_modules) do
-    subscriptions = Enum.map(table_modules, &BaseQueue.id/1)
-    {:consumer, %{}, subscribe_to: subscriptions}
-  end
-
   def start_link(table_modules) do
-    GenStage.start_link(__MODULE__, table_modules, name: __MODULE__)
+    GenServer.start_link(__MODULE__, table_modules, name: __MODULE__)
   end
 
-  defp ask_and_schedule(producers, from) do
-    case producers do
-      %{^from => %Producer{} = producer} ->
-        GenStage.ask(from, producer.max_demand)
-        Process.send_after(self(), {:ask, from}, producer.interval)
-        producers
+  defp can_be_synchronous(base_queue) do
+    base_queue.in_progress < base_queue.max_demand
+  end
 
-      %{} ->
-        producers
+  defp schedule(base_queues, base_id) do
+    with base_queue <- Map.get(base_queues, base_id) do
+      Process.send_after(
+        __MODULE__,
+        {:run_requests, base_id},
+        base_queue.interval
+      )
     end
   end
 end

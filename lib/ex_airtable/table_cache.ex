@@ -80,7 +80,7 @@ defmodule ExAirtable.TableCache do
         {__MODULE__, :push_paginated_list, [table_module]}
       )
 
-    ExAirtable.BaseQueue.request(table_module, fetch_next_page)
+    ExAirtable.RateLimiter.request(table_module, fetch_next_page)
 
     GenServer.cast(table_module, {:set, "paginated_list", new_list})
   end

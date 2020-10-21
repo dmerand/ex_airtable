@@ -8,14 +8,16 @@ defmodule ExAirtable.RateLimiter.Request do
   alias ExAirtable.RateLimiter.Job
 
   defstruct job: nil,
-            callback: nil
+            callback: nil,
+            created: DateTime.now!("Etc/UTC")
 
   @typedoc """
   A request to an `ExAirtable.RateLimiter`.
   """
   @type t :: %__MODULE__{
           job: Job.t(),
-          callback: Job.t()
+          callback: Job.t(),
+          created: DateTime.t()
         }
 
   @doc """
