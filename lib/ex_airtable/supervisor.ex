@@ -30,10 +30,13 @@ defmodule ExAirtable.Supervisor do
   def init({table_modules, opts}) do
     table_caches =
       Enum.map(table_modules, fn module ->
-        {TableCache, Keyword.put(opts, :table_module, module)}
+        Supervisor.child_spec(
+          {TableCache, Keyword.put(opts, :table_module, module)},
+          %{id: :"cache-#{inspect module}"}
+        )
       end)
 
-    children = [{RateLimiter, table_modules}] ++ table_caches
+    children = table_caches ++ [{RateLimiter, table_modules}]
 
     Supervisor.init(children, strategy: :one_for_one)
   end

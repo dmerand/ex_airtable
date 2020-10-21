@@ -45,11 +45,11 @@ defmodule ExAirtable.RateLimiter do
   @impl GenServer
   @doc false
   def handle_info({:run_requests, base_id}, base_queues) do
-    base_queue = Map.get(base_queues, base_id)
+    base_queue = Map.get(base_queues, base_id, %BaseQueue{})
 
     {requests_to_run, remainder} =
       base_queue
-      |> Map.get(:requests)
+      |> Map.get(:requests, [])
       |> Enum.sort_by(& &1.created)
       |> Enum.split(base_queue.max_demand - base_queue.in_progress)
 

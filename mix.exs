@@ -6,7 +6,7 @@ defmodule ExAirtable.MixProject do
       app: :ex_airtable,
       name: "ExAirtable",
       description: description(),
-      version: "0.2.1",
+      version: "0.2.2",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
