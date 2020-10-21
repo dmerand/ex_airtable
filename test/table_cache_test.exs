@@ -44,7 +44,7 @@ defmodule ExAirtable.TableCacheTest do
 
     TableCache.set_all(@table_module, list)
     Process.sleep(20)
-    assert {:ok, %List{} = list} = TableCache.list(@table_module)
+    assert {:ok, %List{}} = TableCache.list(@table_module)
   end
 
   test "delete by ID" do

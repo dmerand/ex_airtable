@@ -52,8 +52,9 @@ defmodule ExAirtable.RateLimiterTest do
     case :sys.get_state(pid) do
       %{} = state ->
         Map.get(state, @table_module.base().id)
-      _ -> 
-      %{}
+
+      _ ->
+        %{}
     end
   end
 end

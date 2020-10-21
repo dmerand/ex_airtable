@@ -19,7 +19,7 @@ defmodule ExAirtable.TableTest do
   test "list all" do
     list = MockTable.list()
     assert %Airtable.List{} = list
-    assert [%Airtable.Record{} | rest] = list.records
+    assert [%Airtable.Record{} | _rest] = list.records
   end
 
   @tag :external_api
@@ -31,7 +31,7 @@ defmodule ExAirtable.TableTest do
   test "list with a view" do
     list = EnvTable.list(params: %{view: "Main View"})
     assert %Airtable.List{} = list
-    assert [%Airtable.Record{} | rest] = list.records
+    assert [%Airtable.Record{} | _rest] = list.records
   end
 
   @tag :external_api

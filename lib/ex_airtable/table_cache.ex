@@ -68,6 +68,8 @@ defmodule ExAirtable.TableCache do
   @doc """
   Given an `ExAirtable.Table` module, and a list result, store that result for later cache replacement.
 
+  Once we have the final page in a paginated list (or a list that has less than 100 records), we can replace the cache.
+
   This function is typically called by an async process to accumulate paginated data from Airtable's list method.
   """
   def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
@@ -85,11 +87,6 @@ defmodule ExAirtable.TableCache do
     GenServer.cast(table_module, {:set, "paginated_list", new_list})
   end
 
-  @doc """
-  Once we have the final page in a paginated list (or a list that has less than 100 records), we can replace the cache.
-
-  This function is typically called by an async process to accumulate paginated data from Airtable's list method.
-  """
   def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
       when is_nil(offset) do
     new_list = set_paginated_list(table_module, list)
@@ -131,7 +128,7 @@ defmodule ExAirtable.TableCache do
   Returns a valid ETS table name for a given `ExAirtable.Table` module.
   """
   def table_for(table_module) do
-    (table_module.base.id <> table_module.name())
+    (table_module.base().id <> table_module.name())
     |> String.to_atom()
   end
 

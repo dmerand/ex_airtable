@@ -28,16 +28,15 @@ defmodule ExAirtable.RateLimiter do
       Request.run(request)
 
       updated_queues =
-        Map.put(base_queues, base_id, 
-          %{base_queue | in_progress: base_queue.in_progress + 1}
-        )
+        Map.put(base_queues, base_id, %{base_queue | in_progress: base_queue.in_progress + 1})
 
       {:noreply, updated_queues}
     else
       updated_queues =
-        Map.put(base_queues, base_id, 
-          %{base_queue | requests: MapSet.put(base_queue.requests, request)}
-        )
+        Map.put(base_queues, base_id, %{
+          base_queue
+          | requests: MapSet.put(base_queue.requests, request)
+        })
 
       {:noreply, updated_queues}
     end
@@ -54,13 +53,14 @@ defmodule ExAirtable.RateLimiter do
       |> Enum.sort_by(& &1.created)
       |> Enum.split(base_queue.max_demand - base_queue.in_progress)
 
-    Enum.map(requests_to_run, & Task.async(fn -> Request.run(&1) end))
+    Enum.map(requests_to_run, &Task.async(fn -> Request.run(&1) end))
     |> Enum.each(&Task.await/1)
 
     updated_queues =
-      Map.put(base_queues, base_id, %{base_queue | 
-        requests: MapSet.new(remainder),
-        in_progress: 0
+      Map.put(base_queues, base_id, %{
+        base_queue
+        | requests: MapSet.new(remainder),
+          in_progress: 0
       })
 
     schedule(updated_queues, base_id)

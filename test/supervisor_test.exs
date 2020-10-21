@@ -4,6 +4,6 @@ defmodule ExAirtable.SupervisorTest do
   @table_module ExAirtable.MockTable
 
   test "does it even work" do
-    assert {:ok, pid} = ExAirtable.Supervisor.start_link([@table_module])
+    assert {:ok, _pid} = ExAirtable.Supervisor.start_link([@table_module])
   end
 end
