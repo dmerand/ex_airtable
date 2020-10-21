@@ -54,7 +54,7 @@ defmodule ExAirtable do
             # ...
 
             # Configure caching and rate-limiting processes
-            {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], [delete_on_refresh: false, sync_rate: :timer.seconds(15)]}},
+            {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], [sync_rate: :timer.seconds(15)]}},
 
             # ...
           ]
@@ -66,7 +66,7 @@ defmodule ExAirtable do
         # ...
       end
       
-  Note that the `:sync_rate` (the rate at which tables are refreshed from Airtable) is optional and will default to 30 seconds if omitted. Similarly `:delete_on_refresh` defaults to `true`, meaning that each sync from Airtable will destroy and re-create the local cache. Set it to `false` to keep your cache from churning too hard if you don't need to sync deletions that happen on the Airtable side in real-time.
+  Note that the `:sync_rate` (the rate at which tables are refreshed from Airtable) is optional and will default to 30 seconds if omitted. 
 
   Once you have configured things this way, you can call `ExAirtable` directly, and get all of the speed and reliability benefits of caching and rate-limiting.
 

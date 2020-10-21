@@ -16,7 +16,7 @@ defmodule ExAirtable.TableCache do
   alias ExAirtable.{Airtable, TableSynchronizer}
   use GenServer
 
-  defstruct table_module: nil, sync_ref: nil, sync_rate: nil, delete_on_refresh: true
+  defstruct table_module: nil, sync_ref: nil, sync_rate: nil, hash: nil
 
   @typedoc """
   A struct that contains the state for a `TableCache`.
@@ -25,8 +25,10 @@ defmodule ExAirtable.TableCache do
           table_module: module(),
           sync_ref: pid(),
           sync_rate: integer(),
-          delete_on_refresh: boolean()
+          hash: String.t()
         }
+
+  @cache_secret "exairtable cache secret"
 
   #
   # PUBLIC API
@@ -42,81 +44,57 @@ defmodule ExAirtable.TableCache do
   end
 
   @doc """
-  Clear all records from the given GenServer. 
-
-  This is a synchronous operation.
-  """
-  def delete_all(table_module) do
-    GenServer.call(table_module, :delete_all)
-  end
-
-  @doc """
   Given an `ExAirtable.Table` module, get all `%Airtable.Record{}`s in that cache's table as an `%Airtable.List{}`.
   """
   def list(table_module) do
-    table_module
-    |> table_for()
-    |> :ets.tab2list()
-    |> case do
-      values when values != [] ->
-        {:ok,
-         %Airtable.List{
-           records: Enum.map(values, &elem(&1, 1))
-         }}
+    values =
+      table_module
+      |> table_for()
+      |> :ets.tab2list()
 
-      _ ->
-        {:error, :not_found}
-    end
+    {:ok,
+     %Airtable.List{
+       records:
+         Enum.reduce(values, [], fn {id, record}, acc ->
+           if id != "paginated_list" do
+             [record | acc]
+           else
+             acc
+           end
+         end)
+     }}
   end
 
   @doc """
   Given an `ExAirtable.Table` module, and a list result, store that result for later cache replacement.
 
-  This function is typically called by an async "crawler" process to accumulate paginated data from Airtable's list method.
+  This function is typically called by an async process to accumulate paginated data from Airtable's list method.
   """
   def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
       when is_binary(offset) do
-    new_list =
-      case retrieve(table_module, "paginated_list") do
-        {:ok, existing_list} ->
-          %{existing_list | records: existing_list.records ++ list.records}
+    new_list = set_paginated_list(table_module, list)
 
-        _ ->
-          list
-      end
-
-    # TODO: This is bad separation of concerns. This should probably be elsewhere.
-    job =
+    fetch_next_page =
       ExAirtable.RateLimiter.Request.create(
         {table_module, :list_async, [[params: [offset: offset]]]},
         {__MODULE__, :push_paginated_list, [table_module]}
       )
 
-    ExAirtable.BaseQueue.request(table_module, job)
+    ExAirtable.BaseQueue.request(table_module, fetch_next_page)
 
     GenServer.cast(table_module, {:set, "paginated_list", new_list})
   end
 
+  @doc """
+  Once we have the final page in a paginated list (or a list that has less than 100 records), we can replace the cache.
+
+  This function is typically called by an async process to accumulate paginated data from Airtable's list method.
+  """
   def push_paginated_list(table_module, %Airtable.List{offset: offset} = list)
       when is_nil(offset) do
-    new_list =
-      case retrieve(table_module, "paginated_list") do
-        {:ok, existing_list} ->
-          %{existing_list | records: existing_list.records ++ list.records}
-
-        _ ->
-          list
-      end
-
-    case GenServer.call(table_module, :get_state) do
-      %{delete_on_refresh: true} ->
-        delete_all(table_module)
-        set_all(table_module, new_list)
-
-      _ ->
-        set_all(table_module, new_list)
-        delete(table_module, %{"id" => "paginated_list"})
-    end
+    new_list = set_paginated_list(table_module, list)
+    delete(table_module, %{"id" => "paginated_list"})
+    set_all(table_module, new_list)
   end
 
   @doc """
@@ -169,17 +147,6 @@ defmodule ExAirtable.TableCache do
   #
 
   @impl GenServer
-  def handle_call(:delete_all, _from, %{table_module: table_module} = state) do
-    :ets.delete_all_objects(table_for(table_module))
-
-    {:reply, state, state}
-  end
-
-  def handle_call(:get_state, _from, state) do
-    {:reply, state, state}
-  end
-
-  @impl GenServer
   def handle_cast({:delete, id}, %{table_module: table_module} = state) do
     table_module
     |> table_for()
@@ -198,19 +165,32 @@ defmodule ExAirtable.TableCache do
 
   def handle_cast(
         {:set_all, %Airtable.List{records: records}},
-        %{table_module: table_module} = state
+        %{hash: hash, table_module: table_module} = state
       ) do
-    table = table_for(table_module)
-    Enum.each(records, &:ets.insert(table, {&1.id, &1}))
+    new_hash = generate_hash(records)
 
-    {:noreply, state}
+    if hash != new_hash do
+      table = table_for(table_module)
+
+      # pull records that have been deleted airtable-side
+      with {:ok, %Airtable.List{} = list} <- list(table_module) do
+        # :-- is much faster starting with Erlang 23, do not worry about speed here.
+        Enum.each(list.records -- records, fn record ->
+          :ets.delete(table, record.id)
+        end)
+      end
+
+      # update/insert new records
+      Enum.each(records, &:ets.insert(table, {&1.id, &1}))
+    end
+
+    {:noreply, %{state | hash: new_hash}}
   end
 
   def handle_cast({:update, list}, %{table_module: table_module} = state) do
     table = table_for(table_module)
 
     Enum.each(list.records, fn record ->
-      :ets.delete(table, record.id)
       :ets.insert(table, {record.id, record})
     end)
 
@@ -240,7 +220,6 @@ defmodule ExAirtable.TableCache do
 
     state = %__MODULE__{
       table_module: table_module,
-      delete_on_refresh: Keyword.get(opts, :delete_on_refresh, true),
       sync_rate: Keyword.get(opts, :sync_rate, :timer.seconds(30))
     }
 
@@ -277,5 +256,21 @@ defmodule ExAirtable.TableCache do
       )
 
     Process.monitor(pid)
+  end
+
+  defp generate_hash(items) do
+    :sha256
+    |> :crypto.hmac(@cache_secret, :erlang.term_to_binary(items))
+    |> Base.encode64()
+  end
+
+  defp set_paginated_list(table_module, list) do
+    case retrieve(table_module, "paginated_list") do
+      {:ok, existing_list} ->
+        %{existing_list | records: List.flatten([existing_list.records | list.records])}
+
+      _ ->
+        list
+    end
   end
 end
