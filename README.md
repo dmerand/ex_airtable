@@ -54,7 +54,7 @@ To run a local caching server, you can include a reference to the `ExAirtable` s
           # ...
 
           # Configure caching and rate-limiting processes
-          {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], [sync_rate: :timer.seconds(15)]}},
+          {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], sync_rate: :timer.seconds(15)}},
 
           # ...
         ]

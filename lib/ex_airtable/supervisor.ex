@@ -18,7 +18,11 @@ defmodule ExAirtable.Supervisor do
 
   - `:sync_rate` (integer) - amount of time in milliseconds between attempts to refresh table data from the API. Each table that you define will re-synchronize at this rate.
   """
-  def start_link(table_modules, opts \\ []) when is_list(table_modules) do
+  def start_link(table_modules) when is_list(table_modules) do
+    Supervisor.start_link(__MODULE__, {table_modules, []}, name: __MODULE__)
+  end
+
+  def start_link({table_modules, opts}) when is_list(table_modules) do
     Supervisor.start_link(__MODULE__, {table_modules, opts}, name: __MODULE__)
   end
 

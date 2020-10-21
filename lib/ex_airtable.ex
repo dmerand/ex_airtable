@@ -54,7 +54,7 @@ defmodule ExAirtable do
             # ...
 
             # Configure caching and rate-limiting processes
-            {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], [sync_rate: :timer.seconds(15)]}},
+            {ExAirtable.Supervisor, {[MyApp.MyAirtable, MyApp.MyOtherAirtable, ...], sync_rate: :timer.seconds(15)}},
 
             # ...
           ]
