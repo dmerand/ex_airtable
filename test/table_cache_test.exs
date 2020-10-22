@@ -14,7 +14,7 @@ defmodule ExAirtable.TableCacheTest do
   test "basics" do
     table_name = TableCache.table_for(@table_module)
     assert is_atom(table_name)
-    assert table_name == :"mock idmock name"
+    assert table_name == :"mockidmockname"
   end
 
   test "set + retrieve by ID" do
