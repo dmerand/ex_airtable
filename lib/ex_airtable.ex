@@ -123,6 +123,8 @@ defmodule ExAirtable do
       iex> MyTable.to_schema(record)
       %{"localfield" => "value"} 
       # 👆 handy for ecto schema conversion
+      
+  See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information about field, list, and schema retrieval, filtering and conversion.
   """
 
   alias ExAirtable.{Airtable, RateLimiter, TableCache}

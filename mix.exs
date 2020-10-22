@@ -11,7 +11,11 @@ defmodule ExAirtable.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      source_url: "https://github.com/exploration/ex_airtable"
+      source_url: "https://github.com/exploration/ex_airtable",
+      docs: [
+        main: "ExAirtable", 
+        extras: ["CHANGELOG.md"]
+      ]
     ]
   end
 
