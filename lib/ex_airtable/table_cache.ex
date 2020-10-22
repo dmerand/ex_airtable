@@ -129,6 +129,7 @@ defmodule ExAirtable.TableCache do
   """
   def table_for(table_module) do
     (table_module.base().id <> table_module.name())
+    |> String.downcase()
     |> String.to_atom()
   end
 

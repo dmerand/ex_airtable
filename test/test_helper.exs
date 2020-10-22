@@ -18,7 +18,7 @@ defmodule ExAirtable.FauxTable do
   alias ExAirtable.{Airtable, Config}
 
   def base, do: %Config.Base{id: "Faux ID", api_key: "Who Cares?"}
-  def name, do: "Faux Name"
+  def name, do: "Faux / Name"
   def retrieve(_id), do: record()
   def list(_opts), do: %Airtable.List{records: [record()]}
   defp record, do: %Airtable.Record{id: "1", createdTime: "Today"}
