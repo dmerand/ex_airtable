@@ -72,10 +72,10 @@ defmodule ExAirtable.Service do
 
   Valid options are:
 
-    - `params` - any parameters you wish to send along to the Airtable API (for example `view: "My View"` or `sort: "My Field"`. See `https://airtable.com/YOURBASEID/api/docs` for details (in the "List Records" sections).
+    - `params` - any parameters you wish to send along to the Airtable API (for example `view: "My View"` or `sort: "My Field"`. These should be sent as a Keyword list (see below). See `https://airtable.com/YOURBASEID/api/docs` for details (in the "List Records" sections).
 
   ## Examples
-      iex> list(table, params: %{view: "My View Name"})
+      iex> list(table, params: [view: "My View Name"])
       %Airtable.List{}
   """
   def list(%Config.Table{} = table, opts \\ []) do
@@ -181,7 +181,7 @@ defmodule ExAirtable.Service do
          opts
        )
        when is_binary(offset) do
-    params = Keyword.get(opts, :params, %{}) |> Map.put(:offset, offset)
+    params = Keyword.get(opts, :params, []) |> Keyword.put(:offset, offset)
     opts = Keyword.put(opts, :params, params)
     new_list = list(table, opts)
 

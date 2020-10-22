@@ -2,6 +2,7 @@
 
 - 0.2.5
   - Make `Table.list_async` overrideable in situations where you want to change the default table listing parameters.
+  - Clean up `params` for `Table.list` and `Table.list_async` to use Keyword lists in both places (instead of a map in one and a keyword list in the other)
 - 0.2.4
   - Add `to_schema()` methods, to make it easier to define a conversion between Airtable field names and in-app field names. Realistically, this will likely be used most in apps that use Ecto schemas internally to validate Airtable data. See `ExAirtable.Table.to_schema` and `ExAirtable.Airtable.Record.to_schema` for more details.
 - 0.2.3

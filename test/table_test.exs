@@ -29,7 +29,7 @@ defmodule ExAirtable.TableTest do
 
   @tag :external_api
   test "list with a view" do
-    list = EnvTable.list(params: %{view: "Main View"})
+    list = EnvTable.list(params: [view: "Main View"])
     assert %Airtable.List{} = list
     assert [%Airtable.Record{} | _rest] = list.records
   end
@@ -37,7 +37,7 @@ defmodule ExAirtable.TableTest do
   @tag :external_api
   test "list with pagination" do
     full_list = EnvTable.list()
-    paginated_list = EnvTable.list(params: %{limit: 10})
+    paginated_list = EnvTable.list(params: [limit: 10])
     assert Enum.count(full_list.records) == Enum.count(paginated_list.records)
   end
 

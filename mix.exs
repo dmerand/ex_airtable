@@ -13,7 +13,7 @@ defmodule ExAirtable.MixProject do
       package: package(),
       source_url: "https://github.com/exploration/ex_airtable",
       docs: [
-        main: "ExAirtable", 
+        main: "ExAirtable",
         extras: ["CHANGELOG.md"]
       ]
     ]
