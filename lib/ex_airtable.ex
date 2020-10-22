@@ -4,9 +4,11 @@ defmodule ExAirtable do
 
   The preferred mode of operation is to run in rate-limited and cached mode, to ensure that no API limitations are hit. The functions in the `ExAirtable` base module will operate through the rate-limiter and cache by default.
 
-  If you wish to skip rate-limiting and caching, you can simply hit the Airtable API directly and get nicely-wrapped results by using the `Table` endpoints directly (see below for setup).
+  If you wish to skip rate-limiting and caching, you can simply hit the Airtable API directly and get nicely-wrapped results by using the `ExAirtable.Table` endpoints directly (see below for setup).
 
-  In either the direct-to-API or cached-and-rate-limited case, this library provides an `%Airtable.Record{}` and `%Airtable.List{}` struct which mirror the API results that Airtable provides. All results will be wrapped in those structs. We (currently) make no effort to convert Airtable's generic data representation into an app's local data domain, but instead provide a sane default that can be easily extended (via Ecto schemas for example). We also provide some convenience methods for things like record field retrieval and relationship matching (see below).
+  In either the direct-to-API or cached-and-rate-limited case, this library provides an `%ExAirtable.Airtable.Record{}` and `%ExAirtable.Airtable.List{}` struct which mirror the API results that Airtable provides. All results will be wrapped in those structs. We (currently) make no effort to convert Airtable's generic data representation into an app's local data domain, but instead provide a sane default that can be easily extended (via Ecto schemas for example). We also provide some convenience methods for things like record field retrieval and relationship matching (see below).
+
+  In addition to this page, be sure to check out the `ExAirtable.Table` documentation page for more details about how to correctly import the Table behaviour.
 
   ## Setup
 

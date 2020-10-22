@@ -58,7 +58,7 @@ defmodule ExAirtable.Airtable.Record do
       iex> to_schema(record, nil)
       %{"airtable_id" => "1", "AirtableField" => "value"}
   """
-  def to_schema(%__MODULE__{} = record, nil) do 
+  def to_schema(%__MODULE__{} = record, nil) do
     Map.merge(
       %{"airtable_id" => record.id},
       record.fields
@@ -66,12 +66,13 @@ defmodule ExAirtable.Airtable.Record do
   end
 
   def to_schema(%__MODULE__{} = record, schema_map) when is_map(schema_map) do
-    schema = Enum.reduce(record.fields, %{}, fn {key, val}, acc ->
-      case Map.get(schema_map, key) do
-        nil -> acc
-        new_key -> Map.put(acc, new_key, val)
-      end
-    end)
+    schema =
+      Enum.reduce(record.fields, %{}, fn {key, val}, acc ->
+        case Map.get(schema_map, key) do
+          nil -> acc
+          new_key -> Map.put(acc, new_key, val)
+        end
+      end)
 
     case is_binary(Enum.at(Map.keys(schema), 0)) do
       true -> Map.merge(schema, %{"airtable_id" => record.id})

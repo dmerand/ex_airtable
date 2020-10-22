@@ -1,5 +1,7 @@
 # CHANGELOG
 
+- 0.2.7
+  - Add a new `ExAirtable.Table.list_params` callback, to allow for all list operations against Airtable to be pre-filtered, pre-sorted, etc. This can do a lot to keep data from coming down the wire, and it's easier to use `list_params` than to keep having to redefine `Table.list` and/or `Table.list_async` each time you want to do that.
 - 0.2.6
   - Add Airtable ID to exported table schemas. See `ExAirtable.Table.to_schema` and `ExAirtable.Airtable.Record.to_schema` for more details.
 - 0.2.5

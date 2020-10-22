@@ -25,7 +25,7 @@ defmodule ExAirtable.Table do
 
   alias ExAirtable.{Airtable, Config, Service}
 
-  @optional_callbacks schema: 0
+  @optional_callbacks list_params: 0, schema: 0
 
   @doc """
   A valid %ExAirtable.Config.Base{} config for your table.
@@ -45,13 +45,33 @@ defmodule ExAirtable.Table do
   """
   @callback base() :: Config.Base.t()
 
+  @doc """
+  (Optional) A map of parameters that you wish to send to Airtable when either `list/1` or `list_async/1` is called.
+
+  You would define this if you want your local `MyTable.list` and `ExAirtable.list(MyTable)` functions to always return a filtered query from Airtable.
+
+  ## Examples
+
+      # To filter records by a boolean "Approved" field, and only return the "Name" and "Picture", your params might look like this:
+      def list_params do
+        [
+          filterByFormula: "{Approved}",
+          fields: "Name",
+          fields: "Picture"
+        ]
+      end
+
+  See [here](https://codepen.io/airtable/full/rLKkYB) for more details about the available Airtable List API options.
+  """
+  @callback list_params() :: Keyword.t()
+
   @doc "The name of your table within Airtable"
   @callback name() :: String.t()
 
   @doc """
   (Optional) A map converting Airtable field names to local schema field names.
 
-  This is handy for situations (ecto schemas, for example) where you want different in-app field names than the fields you get from Airtable.
+  This is handy for situations (passing attributes to ecto schemas, for example) where you may want different in-app field names than the fields you get from Airtable.
 
   If you don't define this method, the default is to simply use Airtable field names as the schema.
 
@@ -81,6 +101,15 @@ defmodule ExAirtable.Table do
   """
   @callback schema() :: map()
 
+  @doc false
+  def update_params(list_params, opts) do
+    params =
+      Keyword.get(opts, :params, [])
+      |> Keyword.merge(list_params)
+
+    Keyword.put(opts, :params, params)
+  end
+
   defmacro __using__(_) do
     quote do
       @behaviour ExAirtable.Table
@@ -101,11 +130,9 @@ defmodule ExAirtable.Table do
 
       @doc """
       Get all records from your Airtable. See `Service.list/3` for details.
-
-      You may wish to override this function in your table module if you want your manual table listings to pass custom parameters (as a `params: keyword_list` in `opts`) to the Airtable API. See `ExAirtable.Service.list/2` for details.
       """
       def list(opts \\ []) do
-        Service.list(table(), opts)
+        Service.list(table(), ExAirtable.Table.update_params(list_params(), opts))
       end
 
       defoverridable list: 1
@@ -113,15 +140,18 @@ defmodule ExAirtable.Table do
       @doc """
       Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. 
 
-      Typically called automatically by a TableSynchronizer
-
-      You may wish to override this function in your table module if you want your cached table listings to pass custom parameters (as a `params: keyword_list` in `opts`) to the Airtable API. See `ExAirtable.Service.list/2` for details.
+      Typically called automatically by a TableSynchronizer process.
       """
       def list_async(opts \\ []) do
-        Service.list_async(table(), opts)
+        Service.list_async(table(), ExAirtable.Table.update_params(list_params(), opts))
       end
 
       defoverridable list_async: 1
+
+      @doc false
+      def list_params, do: []
+
+      defoverridable list_params: 0
 
       @doc """
       Get a single record from your Airtable, matching by ID. 
@@ -148,9 +178,11 @@ defmodule ExAirtable.Table do
       end
 
       @doc """
-      Convert a record to an internal schema, mapping Airtable field names to local field names based on a `%{"Schema" => "map"}`.
+      Convert a record to an attribute map.
 
-      See `ExAirtable.Airtable.Record.to_schema/2` for more details.
+      Airtable field names are converted to local field names based on the `%{"Schema" => "map"}` defined (or overridden) in `schema/1`.
+
+      See `ExAirtable.Airtable.Record.to_schema/2` for more details about the conversion.
       """
       def to_schema(%Airtable.Record{} = record) do
         Airtable.Record.to_schema(record, schema())
