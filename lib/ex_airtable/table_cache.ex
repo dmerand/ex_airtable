@@ -215,7 +215,11 @@ defmodule ExAirtable.TableCache do
   """
   def init(opts) do
     table_module = Keyword.fetch!(opts, :table_module)
-    :ets.new(table_for(table_module), [:ordered_set, :protected, :named_table])
+    try do
+      :ets.new(table_for(table_module), [:ordered_set, :protected, :named_table])
+    rescue
+      _ -> nil
+    end
 
     state = %__MODULE__{
       table_module: table_module,
