@@ -43,7 +43,7 @@ defmodule ExAirtable.Table do
         struct(ExAirtable.Config.Base, Application.get_env(:my_all, Airtable.Base))
       end
   """
-  @callback base :: Config.Base.t()
+  @callback base() :: Config.Base.t()
 
   @doc "The name of your table within Airtable"
   @callback name() :: String.t()
@@ -101,6 +101,8 @@ defmodule ExAirtable.Table do
 
       @doc """
       Get all records from your Airtable. See `Service.list/3` for details.
+
+      You may wish to override this function in your table module if you want your manual table listings to pass custom parameters (as a `params: %{}` in `opts`) to the Airtable API. See `ExAirtable.Service.list/2` for details.
       """
       def list(opts \\ []) do
         Service.list(table(), opts)
@@ -112,6 +114,8 @@ defmodule ExAirtable.Table do
       Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. 
 
       Typically called automatically by a TableSynchronizer
+
+      You may wish to override this function in your table module if you want your cached table listings to pass custom parameters (as a `params: %{}` in `opts`) to the Airtable API. See `ExAirtable.Service.list/2` for details.
       """
       def list_async(opts \\ []) do
         Service.list_async(table(), opts)
