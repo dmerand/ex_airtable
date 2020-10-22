@@ -66,7 +66,7 @@ defmodule ExAirtable.Table do
       end
 
       iex> ExAirtable.Airtable.Record.to_schema(record, MyTable.schema)
-      %{local_field_name: "value", other_local_field: "other value"}
+      %{airtable_id: "rec1234", local_field_name: "value", other_local_field: "other value"}
 
       # If you want string field names for your schema map...
       def schema do
@@ -77,7 +77,7 @@ defmodule ExAirtable.Table do
       end
 
       iex> ExAirtable.Airtable.Record.to_schema(record, MyTable.schema)
-      %{"local_field_name" => "value", "other_local_field" => "other value"}
+      %{"airtable_id" => "rec1234", "local_field_name" => "value", "other_local_field" => "other value"}
   """
   @callback schema() :: map()
 

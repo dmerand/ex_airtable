@@ -59,11 +59,11 @@ defmodule ExAirtable.TableTest do
 
   test "schema conversion with no given schema" do
     record = FauxTable.retrieve(1)
-    assert %{"FieldOne" => "One", "FieldTwo" => "Two"} = FauxTable.to_schema(record)
+    assert %{"airtable_id" => "1", "FieldOne" => "One", "FieldTwo" => "Two"} = FauxTable.to_schema(record)
   end
 
   test "schema conversion with given schema" do
     record = MockTable.retrieve(1)
-    assert %{field_one: "One"} = MockTable.to_schema(record)
+    assert %{airtable_id: "1", field_one: "One"} = MockTable.to_schema(record)
   end
 end

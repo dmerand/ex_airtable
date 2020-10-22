@@ -118,10 +118,10 @@ Because certain tasks such as retrieving fields and finding related data happen 
       end
     end
     
-    iex> record = %ExAirtable.Airtable.Record{fields: %{"AirtableField" => "value"}}
+    iex> record = %ExAirtable.Airtable.Record{id: "1", fields: %{"AirtableField" => "value"}}
     
     iex> MyTable.to_schema(record)
-    %{"localfield" => "value"} 
+    %{"airtable_id" => "1", "localfield" => "value"} 
     # 👆 handy for ecto schema conversion
     
 

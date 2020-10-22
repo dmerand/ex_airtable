@@ -118,10 +118,10 @@ defmodule ExAirtable do
         end
       end
       
-      iex> record = %ExAirtable.Airtable.Record{fields: %{"AirtableField" => "value"}}
+      iex> record = %ExAirtable.Airtable.Record{id: "1", fields: %{"AirtableField" => "value"}}
       
       iex> MyTable.to_schema(record)
-      %{"localfield" => "value"} 
+      %{"airtable_id" => "1", "localfield" => "value"} 
       # 👆 handy for ecto schema conversion
       
   See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information about field, list, and schema retrieval, filtering and conversion.
