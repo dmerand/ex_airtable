@@ -197,7 +197,6 @@ defmodule ExAirtable.Service do
 
   defp push_to_paginated_list(list, _table, _opts), do: list
 
-
   defp remove_objectionable_fields(%Airtable.List{} = list, fields \\ [:id]) do
     # Airtable really doesn't like createdTime being in any pushes.
     fields = [:createdTime] ++ fields

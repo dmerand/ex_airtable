@@ -9,7 +9,14 @@ defmodule ExAirtable.MockTable do
   def name, do: "Mock Name"
   def retrieve(_id), do: record()
   def list(_opts), do: %Airtable.List{records: [record()]}
-  defp record, do: %Airtable.Record{id: "1", createdTime: "Today"}
+  def schema, do: %{"FieldOne" => :field_one}
+
+  defp record,
+    do: %Airtable.Record{
+      id: "1",
+      createdTime: "Today",
+      fields: %{"FieldOne" => "One", "FieldTwo" => "Two"}
+    }
 end
 
 defmodule ExAirtable.FauxTable do
@@ -21,5 +28,11 @@ defmodule ExAirtable.FauxTable do
   def name, do: "Faux / Name"
   def retrieve(_id), do: record()
   def list(_opts), do: %Airtable.List{records: [record()]}
-  defp record, do: %Airtable.Record{id: "1", createdTime: "Today"}
+
+  defp record,
+    do: %Airtable.Record{
+      id: "1",
+      createdTime: "Today",
+      fields: %{"FieldOne" => "One", "FieldTwo" => "Two"}
+    }
 end

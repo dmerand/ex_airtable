@@ -32,7 +32,7 @@ defmodule ExAirtable.Supervisor do
       Enum.map(table_modules, fn module ->
         Supervisor.child_spec(
           {TableCache, Keyword.put(opts, :table_module, module)},
-          %{id: :"cache-#{inspect module}"}
+          %{id: :"cache-#{inspect(module)}"}
         )
       end)
 

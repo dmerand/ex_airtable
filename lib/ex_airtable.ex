@@ -96,6 +96,8 @@ defmodule ExAirtable do
       iex> ExAirtable.list(EnvTable)
       %ExAirtable.Airtable.List{}
       
+  ## Convenience Methods
+      
   Because certain tasks such as retrieving fields and finding related data happen so often, we put in a few convenience functions to make those jobs easier.
 
       # grab a field from a record
@@ -103,10 +105,24 @@ defmodule ExAirtable do
       ["rec1234", "rec3456"]
 
       # find related table data based on a record ID
+      # (ie find all records in `list` where `"Users"` matches `"rec1234"`)
       iex> ExAirtable.Airtable.List.filter_relations(list, "Users", "rec1234")
       [%Record{fields: %{"Users" => ["rec1234", "rec3456"]}}, ...]
-
-  See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information.
+      
+      # convert Airtable field names into local field names
+      defmodule MyTable do
+        use ExAirtable
+        
+        def schema do
+          %{"AirtableField" => "localfield"}
+        end
+      end
+      
+      iex> record = %ExAirtable.Airtable.Record{fields: %{"AirtableField" => "value"}}
+      
+      iex> MyTable.to_schema(record)
+      %{"localfield" => "value"} 
+      # 👆 handy for ecto schema conversion
   """
 
   alias ExAirtable.{Airtable, RateLimiter, TableCache}

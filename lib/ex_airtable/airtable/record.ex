@@ -38,4 +38,34 @@ defmodule ExAirtable.Airtable.Record do
   def get(%__MODULE__{} = record, field, default \\ nil) do
     Map.get(record.fields, field, default)
   end
+
+  @doc """
+  Convert a record to an internal schema, mapping Airtable field names to local field names based on a `%{"Schema" => "map"}`.
+
+  Returns a plain map, suitable for eg. Ecto casting + conversion.
+
+  Note that fields not included in the `schema()` map (which is empty by default) will not be added to the final schema. This is by design, since we don't always care to deal with every field that's returned by Airtable in our local systems. However, it does mean that you will want to take care to include every field that you wish to convert into your local schema.
+
+  If no schema map is given, the record fields are returned unmodified as a map.
+
+  ## Examples
+
+      iex> record = %ExAirtable.Airtable.Record{fields: %{"AirtableField" => "value"}}
+
+      iex> to_schema(record, %{"AirtableField" => "localfield"})
+      %{"localfield" => "value"}
+
+      iex> to_schema(record, nil)
+      %{"AirtableField" => "value"}
+  """
+  def to_schema(%__MODULE__{} = record, nil), do: record.fields
+
+  def to_schema(%__MODULE__{} = record, schema_map) when is_map(schema_map) do
+    Enum.reduce(record.fields, %{}, fn {key, val}, acc ->
+      case Map.get(schema_map, key) do
+        nil -> acc
+        new_key -> Map.put(acc, new_key, val)
+      end
+    end)
+  end
 end

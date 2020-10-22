@@ -96,6 +96,8 @@ The codebase includes an example `Table` (`ExAirtable.Example.EnvTable`) that yo
     iex> ExAirtable.list(EnvTable)
     %ExAirtable.Airtable.List{}
     
+## Convenience Methods
+    
 Because certain tasks such as retrieving fields and finding related data happen so often, we put in a few convenience functions to make those jobs easier.
 
     # grab a field from a record
@@ -103,15 +105,31 @@ Because certain tasks such as retrieving fields and finding related data happen 
     ["rec1234", "rec3456"]
 
     # find related table data based on a record ID
+    # (ie find all records in `list` where `"Users"` matches `"rec1234"`)
     iex> ExAirtable.Airtable.List.filter_relations(list, "Users", "rec1234")
     [%Record{fields: %{"Users" => ["rec1234", "rec3456"]}}, ...]
+    
+    # convert Airtable field names into local field names
+    defmodule MyTable do
+      use ExAirtable
+      
+      def schema do
+        %{"AirtableField" => "localfield"}
+      end
+    end
+    
+    iex> record = %ExAirtable.Airtable.Record{fields: %{"AirtableField" => "value"}}
+    
+    iex> MyTable.to_schema(record)
+    %{"localfield" => "value"} 
+    # 👆 handy for ecto schema conversion
+    
 
-See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information.
+See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information about field, list, and schema retrieval, filtering and conversion.
       
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ex_airtable` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `ex_airtable` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
