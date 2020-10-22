@@ -106,7 +106,6 @@ defmodule ExAirtable.Table do
         Service.list(table(), opts)
       end
 
-      # Make overrideable for testing mocks
       defoverridable list: 1
 
       @doc """
@@ -117,6 +116,8 @@ defmodule ExAirtable.Table do
       def list_async(opts \\ []) do
         Service.list_async(table(), opts)
       end
+
+      defoverridable list_async: 1
 
       @doc """
       Get a single record from your Airtable, matching by ID. 

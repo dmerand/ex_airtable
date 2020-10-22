@@ -2,6 +2,7 @@
 
 - 0.2.4
   - Add `to_schema()` methods, to make it easier to define a conversion between Airtable field names and in-app field names. Realistically, this will likely be used most in apps that use Ecto schemas internally to validate Airtable data. See `ExAirtable.Table.to_schema` and `ExAirtable.Airtable.Record.to_schema` for more details.
+  - Make `Table.list_async` overrideable in situations where you want to change the default table listing parameters.
 - 0.2.3
   - More fixing of bugs around table naming. Everything is picky about weird table names!
 - 0.2.2
