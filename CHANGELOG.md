@@ -1,5 +1,7 @@
 # CHANGELOG
 
+- 0.2.3
+  - More fixing of bugs around table naming. Everything is picky about weird table names!
 - 0.2.2
   - Fixed a bug that prevented starting a supervisor with multiple tables.
   - Fixed a bug in URI encoding that prevented tables with crazy characters in their names (like "/") from being queried.
