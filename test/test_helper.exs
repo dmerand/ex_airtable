@@ -9,7 +9,7 @@ defmodule ExAirtable.MockTable do
   def name, do: "Mock Name"
   def retrieve(_id), do: record()
   def list(_opts), do: %Airtable.List{records: [record()]}
-  def schema, do: %{"FieldOne" => :field_one}
+  def schema, do: %{"FieldOne" => :field_one, "FieldTwo" => :field_two}
 
   defp record,
     do: %Airtable.Record{

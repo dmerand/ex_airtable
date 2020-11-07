@@ -71,9 +71,12 @@ defmodule ExAirtable.Table do
   @doc """
   (Optional) A map converting Airtable field names to local schema field names.
 
-  This is handy for situations (passing attributes to ecto schemas, for example) where you may want different in-app field names than the fields you get from Airtable.
+  This is handy for situations (passing attributes to ecto schemas, for
+  example) where you may want different in-app field names than the fields you
+  get from Airtable.
 
-  If you don't define this method, the default is to simply use Airtable field names as the schema.
+  If you don't define this method, the default is to simply use Airtable field
+  names as the schema.
 
   ## Examples
 
@@ -98,6 +101,8 @@ defmodule ExAirtable.Table do
 
       iex> ExAirtable.Airtable.Record.to_schema(record, MyTable.schema)
       %{"airtable_id" => "rec1234", "local_field_name" => "value", "other_local_field" => "other value"}
+
+  See also `to_schema/1` and `from_schema/1`.
   """
   @callback schema() :: map()
 
@@ -129,6 +134,18 @@ defmodule ExAirtable.Table do
       end
 
       @doc """
+      Convert an attribute map back to an %ExAirtable.Airtable.Record().
+
+      Airtable field names are converted to local field names based on the
+      `%{"Schema" => "map"}` defined (or overridden) in `schema/1`.
+
+      See `ExAirtable.Airtable.Record.from_schema/2` for more details about the conversion.
+      """
+      def from_schema(attrs) when is_map(attrs) do
+        Airtable.Record.from_schema(__MODULE__, attrs)
+      end
+
+      @doc """
       Get all records from your Airtable. See `Service.list/3` for details.
       """
       def list(opts \\ []) do
@@ -138,7 +155,8 @@ defmodule ExAirtable.Table do
       defoverridable list: 1
 
       @doc """
-      Similar to `list/1`, except results aren't automatically concatenated with multiple API requests. 
+      Similar to `list/1`, except results aren't automatically concatenated
+      with multiple API requests. 
 
       Typically called automatically by a TableSynchronizer process.
       """
@@ -180,7 +198,8 @@ defmodule ExAirtable.Table do
       @doc """
       Convert a record to an attribute map.
 
-      Airtable field names are converted to local field names based on the `%{"Schema" => "map"}` defined (or overridden) in `schema/1`.
+      Airtable field names are converted to local field names based on the
+      `%{"Schema" => "map"}` defined (or overridden) in `schema/1`.
 
       See `ExAirtable.Airtable.Record.to_schema/2` for more details about the conversion.
       """

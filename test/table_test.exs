@@ -68,4 +68,16 @@ defmodule ExAirtable.TableTest do
     record = MockTable.retrieve(1)
     assert %{airtable_id: "1", field_one: "One"} = MockTable.to_schema(record)
   end
+
+  test "schema reversal recreates record if schema is defined" do
+    record = MockTable.retrieve(1)
+    attrs = MockTable.to_schema(record)
+    assert MockTable.retrieve(1) == MockTable.from_schema(attrs)
+  end
+
+  test "schema reversal returns passed attributes as fields if no schema is defined" do
+    record = FauxTable.retrieve(1)
+    attrs = FauxTable.to_schema(record)
+    assert FauxTable.retrieve(1) == FauxTable.from_schema(attrs)
+  end
 end
