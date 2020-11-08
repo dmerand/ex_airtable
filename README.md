@@ -2,7 +2,9 @@
 
 Provides an interface to query Airtable bases/tables, and an optional server to cache the results of a table into memory for faster access and to avoid Airtable API access limitations.
 
-Check out the latest project documentation here: <https://hexdocs.pm/ex_airtable/ExAirtable.html>
+For all of the details, check out the latest project documentation here: <https://hexdocs.pm/ex_airtable/ExAirtable.html>.
+
+If you're interested in using ExAirtable in a Phoenix project and/or with Ecto schema validation, you may want to check out <https://hex.pm/packages/ex_airtable_phoenix>
 
 ## Installation
 
