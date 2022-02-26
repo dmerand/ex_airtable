@@ -48,7 +48,7 @@ defmodule ExAirtable.MixProject do
   defp package do
     [
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/exploration/ex_airtable"}
+      links: %{"GitHub" => "https://github.com/dmerand/ex_airtable"}
     ]
   end
 end
