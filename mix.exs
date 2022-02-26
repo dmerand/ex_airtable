@@ -6,12 +6,12 @@ defmodule ExAirtable.MixProject do
       app: :ex_airtable,
       name: "ExAirtable",
       description: description(),
-      version: "0.2.8",
+      version: "0.2.9",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      source_url: "https://github.com/exploration/ex_airtable",
+      source_url: "https://github.com/dmerand/ex_airtable",
       docs: docs()
     ]
   end
