@@ -134,7 +134,7 @@ defmodule ExAirtable.Service do
       encode(table.base.id) <>
       "/" <>
       encode(table.name) <>
-      encode(suffix)
+      suffix
   end
 
   defp default_headers(%Config.Table{} = table) do
