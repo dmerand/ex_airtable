@@ -115,7 +115,7 @@ defmodule ExAirtable.Service do
   def update(%Config.Table{} = table, %Airtable.List{} = list, opts \\ []) do
     method =
       case Keyword.fetch(opts, :overwrite) do
-        true -> :put
+        {:ok, true} -> :put
         _ -> :patch
       end
 
