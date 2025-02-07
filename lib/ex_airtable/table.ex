@@ -1,6 +1,6 @@
 defmodule ExAirtable.Table do
   @moduledoc """
-  The `Table` behaviour allows you to define your own modules that use Airtables. 
+  The `Table` behaviour allows you to define your own modules that use Airtables.
 
   It is a thin wrapper around `Service`, but often more convenient to use.
 
@@ -17,10 +17,10 @@ defmodule ExAirtable.Table do
       end
 
       iex> MyTable.list()
-      %ExAirtable.Airtable.List{} 
+      %ExAirtable.Airtable.List{}
 
       iex> MyTable.retrieve("rec123")
-      %ExAirtable.Airtable.Record{} 
+      %ExAirtable.Airtable.Record{}
   """
 
   alias ExAirtable.{Airtable, Config, Service}
@@ -156,7 +156,7 @@ defmodule ExAirtable.Table do
 
       @doc """
       Similar to `list/1`, except results aren't automatically concatenated
-      with multiple API requests. 
+      with multiple API requests.
 
       Typically called automatically by a TableSynchronizer process.
       """
@@ -172,7 +172,7 @@ defmodule ExAirtable.Table do
       defoverridable list_params: 0
 
       @doc """
-      Get a single record from your Airtable, matching by ID. 
+      Get a single record from your Airtable, matching by ID.
 
       See `Service.retrieve/2` for details.
       """
