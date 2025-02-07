@@ -37,25 +37,28 @@ defmodule ExAirtable.Airtable.Record do
   This is essentially the reverse of `to_schema/2`.
   """
   def from_schema(table_module, attrs) when is_atom(table_module) and is_map(attrs) do
-    reverse_schema = case apply(table_module, :schema, []) do
-      nil ->
-        Enum.reduce(attrs, %{}, fn {k, _v}, acc -> 
-          if k == "airtable_id" || k == "inserted_at" do
-            acc
-          else
-            Map.put(acc, k, k) 
-          end
-        end)
-      schema ->
-        Enum.reduce(schema, %{}, fn {k, v}, acc -> Map.put(acc, v, k) end)
-    end
+    reverse_schema =
+      case apply(table_module, :schema, []) do
+        nil ->
+          Enum.reduce(attrs, %{}, fn {k, _v}, acc ->
+            if k == "airtable_id" || k == "inserted_at" do
+              acc
+            else
+              Map.put(acc, k, k)
+            end
+          end)
 
-    fields = Enum.reduce(attrs, %{}, fn {k, v}, acc ->
-      case Map.get(reverse_schema, k) do
-        nil -> acc
-        airtable_key -> Map.put(acc, airtable_key, v)
+        schema ->
+          Enum.reduce(schema, %{}, fn {k, v}, acc -> Map.put(acc, v, k) end)
       end
-    end)
+
+    fields =
+      Enum.reduce(attrs, %{}, fn {k, v}, acc ->
+        case Map.get(reverse_schema, k) do
+          nil -> acc
+          airtable_key -> Map.put(acc, airtable_key, v)
+        end
+      end)
 
     %__MODULE__{
       fields: fields,
@@ -109,9 +112,11 @@ defmodule ExAirtable.Airtable.Record do
       end)
 
     case is_binary(Enum.at(Map.keys(schema), 0)) do
-      true -> Map.merge(schema, %{"airtable_id" => record.id, "inserted_at" => record.createdTime})
-      false -> Map.merge(schema, %{airtable_id: record.id, inserted_at: record.createdTime})
+      true ->
+        Map.merge(schema, %{"airtable_id" => record.id, "inserted_at" => record.createdTime})
+
+      false ->
+        Map.merge(schema, %{airtable_id: record.id, inserted_at: record.createdTime})
     end
   end
-
 end

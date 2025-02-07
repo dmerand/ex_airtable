@@ -67,14 +67,14 @@ defmodule ExAirtable do
 
         # ...
       end
-      
-  Note that the `:sync_rate` (the rate at which tables are refreshed from Airtable) is optional and will default to 30 seconds if omitted. 
+
+  Note that the `:sync_rate` (the rate at which tables are refreshed from Airtable) is optional and will default to 30 seconds if omitted.
 
   Once you have configured things this way, you can call `ExAirtable` directly, and get all of the speed and reliability benefits of caching and rate-limiting.
 
       iex> ExAirtable.list(MyApp.MyAirtable)
       {:ok, %ExAirtable.Airtable.List{}}
-      
+
       iex> ExAirtable.retrieve(MyApp.MyAirtable, "rec12345")
       {:ok, %ExAirtable.Airtable.Record{}}
 
@@ -83,7 +83,7 @@ defmodule ExAirtable do
   The codebase includes an example `Table` (`ExAirtable.Example.EnvTable`) that you can use to play around and get an idea of how the system works. This module uses environment variables as configuration. The included `Makefile` provides some quick command-line tools to run tests and a console with those environment variables pre-loaded. Simply edit the relevant environment variables in `Makefile` to point to a valid base/table name, and you'll be able to interact directly like this:
 
       # first, run `make console`, then...
-     
+
       # retrieve data directly from Airtable's API...
       iex> EnvTable.list
       %ExAirtable.Airtable.List{records: [%Record{}, %Record{}, ...]}
@@ -91,15 +91,15 @@ defmodule ExAirtable do
       iex> EnvTable.retrieve("rec12345")
       %ExAirtable.Airtable.Record{}
 
-      # start a caching and rate-limiting server 
+      # start a caching and rate-limiting server
       iex> ExAirtable.Supervisor.start_link([EnvTable])
 
       # get all records from the cache (without hitting the Airtable API)
       iex> ExAirtable.list(EnvTable)
       %ExAirtable.Airtable.List{}
-      
+
   ## Convenience Methods
-      
+
   Because certain tasks such as retrieving fields and finding related data happen so often, we put in a few convenience functions to make those jobs easier.
 
       # grab a field from a record
@@ -110,22 +110,22 @@ defmodule ExAirtable do
       # (ie find all records in `list` where `"Users"` matches `"rec1234"`)
       iex> ExAirtable.Airtable.List.filter_relations(list, "Users", "rec1234")
       [%Record{fields: %{"Users" => ["rec1234", "rec3456"]}}, ...]
-      
+
       # convert Airtable field names into local field names
       defmodule MyTable do
         use ExAirtable
-        
+
         def schema do
           %{"AirtableField" => "localfield"}
         end
       end
-      
+
       iex> record = %ExAirtable.Airtable.Record{id: "1", fields: %{"AirtableField" => "value"}}
-      
+
       iex> MyTable.to_schema(record)
-      %{"airtable_id" => "1", "localfield" => "value"} 
+      %{"airtable_id" => "1", "localfield" => "value"}
       # 👆 handy for ecto schema conversion
-      
+
   See the `ExAirtable.Airtable.List` and `ExAirtable.Airtable.Record` module documentation for more information about field, list, and schema retrieval, filtering and conversion.
   """
 
@@ -133,7 +133,7 @@ defmodule ExAirtable do
   alias ExAirtable.RateLimiter.Request
 
   @doc """
-  Create one or more records in your Airtable from an %Airtable.List{} request. 
+  Create one or more records in your Airtable from an %Airtable.List{} request.
 
   If your list includes more than 10 records, the request will be split so as not to be rejected by the Airtable API.
 
@@ -157,7 +157,7 @@ defmodule ExAirtable do
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable. 
+  Delete a single record (by ID) from an Airtable.
 
   If successful, the record will be deleted from the cache as well.
 
@@ -214,7 +214,7 @@ defmodule ExAirtable do
   end
 
   @doc """
-  Update a record in your Airtable. 
+  Update a record in your Airtable.
 
   This call is asynchronous, but the local cache will be automatically updated when the callback is successful.
 

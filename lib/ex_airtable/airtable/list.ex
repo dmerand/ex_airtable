@@ -1,6 +1,6 @@
 defmodule ExAirtable.Airtable.List do
   @moduledoc """
-  Struct for an Airtable List of Records. 
+  Struct for an Airtable List of Records.
 
   This should directly match results being sent/returned from the Airtable REST API.
   """
@@ -17,7 +17,7 @@ defmodule ExAirtable.Airtable.List do
         }
 
   @doc """
-  Convert a typical Airtable JSON response into an %ExAirtable.Airtable.List{}. 
+  Convert a typical Airtable JSON response into an %ExAirtable.Airtable.List{}.
 
   Any weird response will return an empty list.
   """
@@ -31,7 +31,7 @@ defmodule ExAirtable.Airtable.List do
   def from_map(_other), do: %__MODULE__{}
 
   @doc """
-  Filter the records in a list by a given function. 
+  Filter the records in a list by a given function.
 
   Returns an array of `%ExAirtable.Airtable.Record{}` structs.
 

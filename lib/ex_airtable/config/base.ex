@@ -1,6 +1,6 @@
 defmodule ExAirtable.Config.Base do
   @moduledoc """
-  Configuration struct for an Airtable "base". 
+  Configuration struct for an Airtable "base".
 
   This is extracted into a separate type/module so that it can be more easily centrlized in systems that implement multiple tables / bases.
   """

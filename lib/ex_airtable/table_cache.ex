@@ -1,11 +1,11 @@
 defmodule ExAirtable.TableCache do
   @moduledoc """
-  A caching server for an `ExAirtable.Table`. 
+  A caching server for an `ExAirtable.Table`.
 
   Given a module name that implements the `Table` behaviour, it will automatically spawn synchronization processes and provide an in-memory data store that stays in sync with the external Airtable table/base.
 
   ## Examples
-      
+
       iex> TableCache.retrieve(MyAirtableTable, "rec1234")
       %Airtable.Record{}
 
@@ -35,7 +35,7 @@ defmodule ExAirtable.TableCache do
   #
 
   @doc """
-  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID. 
+  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID.
 
   This is an asynchronous operation.
   """
@@ -142,7 +142,7 @@ defmodule ExAirtable.TableCache do
   end
 
   #
-  # GENSERVER 
+  # GENSERVER
   #
 
   @impl GenServer

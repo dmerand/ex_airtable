@@ -1,6 +1,6 @@
 defmodule ExAirtable.Service do
   @moduledoc """
-  The `Service` defines methods to directly hit the Airtable API. 
+  The `Service` defines methods to directly hit the Airtable API.
 
   Most methods take an `Airtable.Config.Table{}`, along with parameters to be forwarded to the REST API.
 
@@ -9,14 +9,14 @@ defmodule ExAirtable.Service do
   API results will be returned in `ExAirtable.Airtable.List{}` and `ExAirtable.Airtable.Record{}` structs, to match what the Airtable API returns.
 
   ## Examples
-    
+
       iex> table = %ExAirtable.Config.Table{
         base: %ExAirtable.Config.Base{
           id: "your base ID",
           api_key: "your api key"
         },
         name: "My Airtable Table Name"
-      } 
+      }
       iex> list(table)
       %Airtable.List{}
 
@@ -29,7 +29,7 @@ defmodule ExAirtable.Service do
   alias ExAirtable.{Airtable, Config}
 
   @doc """
-  Create a record in Airtable. Pass in a valid `%ExAirtable.Airtable.List{}` struct. 
+  Create a record in Airtable. Pass in a valid `%ExAirtable.Airtable.List{}` struct.
 
   Returns an `%ExAirtable.Airtable.List{}` on success.
 
@@ -57,7 +57,7 @@ defmodule ExAirtable.Service do
   Returns a custom map on success - see below.
 
   ## Example
-      
+
       iex> delete(table, "recJmmAR0IzpaekBn")
       %{"deleted" => true, "id" => "recJmmAR0IzpaekBn"}
   """
@@ -85,7 +85,7 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests. 
+  Similar to `list/2`, except results aren't automatically concatenated with multiple API requests.
 
   This is typically utilized by cache processes rather than called by hand - although it could be used by hand if you only want one page of results.
   """
@@ -95,7 +95,7 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Retrieve a single record, matching by ID. 
+  Retrieve a single record, matching by ID.
 
   Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
