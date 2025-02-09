@@ -52,7 +52,7 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable.
+  Delete a single record or list of records by ID from an Airtable.
 
   Returns a custom map on success - see below.
 
