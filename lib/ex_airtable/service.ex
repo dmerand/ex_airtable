@@ -52,7 +52,7 @@ defmodule ExAirtable.Service do
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable.
+  Delete a single record or list of records by ID from an Airtable.
 
   Returns a custom map on success - see below.
 
@@ -62,7 +62,13 @@ defmodule ExAirtable.Service do
       %{"deleted" => true, "id" => "recJmmAR0IzpaekBn"}
   """
   def delete(%Config.Table{} = table, id) when is_binary(id) do
-    perform_request(table, method: :delete, url_suffix: "/#{id}")
+    perform_request(table, method: :delete, url_suffix: "/" <> id)
+  end
+
+  def delete(%Config.Table{} = table, list) when is_list(list) do
+    params = Enum.reduce(list, [], fn id, acc -> Enum.into(acc, "records[]": id) end)
+
+    perform_request(table, method: :delete, params: params)
   end
 
   @doc """
@@ -134,7 +140,7 @@ defmodule ExAirtable.Service do
       encode(table.base.id) <>
       "/" <>
       encode(table.name) <>
-      encode(suffix)
+      suffix
   end
 
   defp default_headers(%Config.Table{} = table) do

@@ -157,9 +157,9 @@ defmodule ExAirtable do
   end
 
   @doc """
-  Delete a single record (by ID) from an Airtable.
+  Delete a single record or list of records by ID from an Airtable.
 
-  If successful, the record will be deleted from the cache as well.
+  If successful, the records will be deleted from the cache as well.
 
   This call is asynchronous, but the local cache will be automatically updated when the callback is successful.
   """
@@ -171,6 +171,19 @@ defmodule ExAirtable do
       )
 
     RateLimiter.request(table_module, job)
+  end
+
+  def delete(table_module, list) when is_list(list) do
+    Enum.chunk_every(list, 10)
+    |> Enum.each(fn ids ->
+      job =
+        Request.create(
+          {table_module, :delete, [ids]},
+          {TableCache, :delete, [table_module]}
+        )
+
+      RateLimiter.request(table_module, job)
+    end)
   end
 
   @doc """

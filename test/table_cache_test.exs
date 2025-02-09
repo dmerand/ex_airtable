@@ -49,11 +49,27 @@ defmodule ExAirtable.TableCacheTest do
 
   test "delete by ID" do
     TableCache.set(@table_module, "cool", "beans")
+    TableCache.set(@table_module, "hot", "pepper")
     Process.sleep(20)
     assert {:ok, "beans"} = TableCache.retrieve(@table_module, "cool")
+
     TableCache.delete(@table_module, %{"id" => "cool"})
     Process.sleep(100)
     assert {:error, :not_found} = TableCache.retrieve(@table_module, "cool")
+    assert {:ok, "pepper"} = TableCache.retrieve(@table_module, "hot")
+  end
+
+  test "delete by multiple IDs" do
+    TableCache.set(@table_module, "cool", "beans")
+    TableCache.set(@table_module, "hot", "pepper")
+    Process.sleep(20)
+    assert {:ok, "beans"} = TableCache.retrieve(@table_module, "cool")
+    assert {:ok, "pepper"} = TableCache.retrieve(@table_module, "hot")
+
+    TableCache.delete(@table_module, %{"records" => [%{"id" => "cool"}, %{"id" => "hot"}]})
+    Process.sleep(100)
+    assert {:error, :not_found} = TableCache.retrieve(@table_module, "cool")
+    assert {:error, :not_found} = TableCache.retrieve(@table_module, "hot")
   end
 
   test "update existing record" do

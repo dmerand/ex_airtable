@@ -35,12 +35,42 @@ defmodule ExAirtable.TableCache do
   #
 
   @doc """
-  Given an `ExAirtable.Table` module and an ID map, delete the record matching that ID.
+  Given an `ExAirtable.Table` module, delete a single record or a list of records from the cache.
 
   This is an asynchronous operation.
   """
   def delete(table_module, %{"id" => id}) do
-    GenServer.cast(table_module, {:delete, id})
+    if exists?(table_module, id) do
+      GenServer.cast(table_module, {:delete, id})
+    end
+  end
+
+  def delete(table_module, %{"records" => list}) do
+    Enum.each(list, &delete(table_module, &1))
+  end
+
+  def delete(_table_module, {:error, %HTTPoison.Response{status_code: status_code}}) do
+    reason =
+      case status_code do
+        404 -> :not_found
+        422 -> :invalid_record_ids
+        _ -> :unknown
+      end
+
+    {:error, reason}
+  end
+
+  @doc """
+  Given an `ExAirtable.Table` module and a string key, check if key exists.
+  """
+  def exists?(table_module, key) when is_binary(key) do
+    table_module
+    |> table_for()
+    |> :ets.lookup(key)
+    |> case do
+      [] -> false
+      _ -> true
+    end
   end
 
   @doc """

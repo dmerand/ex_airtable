@@ -127,10 +127,14 @@ defmodule ExAirtable.Table do
       end
 
       @doc """
-      Delete a single record (by ID) from an Airtable
+      Delete a single or list of records by ID from an Airtable.
       """
       def delete(id) when is_binary(id) do
         Service.delete(table(), id)
+      end
+
+      def delete(list) when is_list(list) do
+        Service.delete(table(), list)
       end
 
       @doc """
